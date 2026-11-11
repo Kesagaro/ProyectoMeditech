@@ -1,0 +1,18 @@
+# Compilados
+bin/
+out/
+*.class
+
+# Datos generados en ejecución (usuarios.txt se versiona como demo)
+data/Medicamentos.txt
+data/ordenes.txt
+data/temp_*.txt
+
+# IDE
+.metadata/
+*.iml
+.idea/
+
+# Sistema operativo
+Thumbs.db
+.DS_Store
