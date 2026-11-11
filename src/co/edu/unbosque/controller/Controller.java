@@ -25,7 +25,6 @@ public class Controller {
 		view.getPanelInventario().getAgregarButton().addActionListener(e -> agregarMedicamento());
 		view.getPanelInventario().getActualizarButton().addActionListener(e -> actualizarMedicamento());
 		view.getPanelInventario().getAtrasButton().addActionListener(e -> showPanelMenu());
-		view.getPanelInventario().getAtrasButton().addActionListener(e -> showPanelMenu());
 
 		view.getPanelInicio().getLoginButton().addActionListener(e -> showPanelLogin());
 		view.getPanelInicio().getRegisterButton().addActionListener(e -> showPanelRegistro());
@@ -42,7 +41,6 @@ public class Controller {
 		view.getPanelMenu().getFuncionariosButton().addActionListener(e -> showPanelFuncionarios());
 
 		view.getPanelTurno().getTurnoButton().addActionListener(e -> generarYMostrarTurno());
-		view.getPanelTurno().getTurnoButton().addActionListener(e -> generarYMostrarTurno());
 		view.getPanelTurno().getAtrasButton().addActionListener(e -> showPanelMenu());
 
 		view.getPanelReport().getTop5Button().addActionListener(e -> showPanelTop5());
@@ -58,7 +56,6 @@ public class Controller {
 		view.getPanelFuncionarios().getAtrasButton().addActionListener(e -> showPanelMenu());
 		view.getPanelFuncionarios().getListarButton().addActionListener(e -> listarFuncionarios());
 		view.getPanelFuncionarios().getEliminarButton().addActionListener(e -> eliminarFuncionario());
-		view.getPanelFuncionarios().getAtrasButton().addActionListener(e -> showPanelMenu());
 
 	}
 	
