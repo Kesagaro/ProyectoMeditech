@@ -56,6 +56,12 @@ src/co/edu/unbosque/
 └── view/                View (JFrame + CardLayout) y un panel por pantalla
 ```
 
+### Diagrama de clases
+
+![Diagrama de clases MVC](docs/diagramas/diagrama-de-clases.png)
+
+Modelo editable en Astah: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/BosqueFarma.asta).
+
 ### Persistencia
 
 | Archivo | Formato | Contenido |
