@@ -43,6 +43,29 @@ public class MedicamentoDAO implements Crud<MedicamentoDTO> {
         }
     }
 
+    public boolean existeId(long id) {
+        return buscarIndicePorId(id) >= 0;
+    }
+
+    public String actualizarPorId(long id, MedicamentoDTO newData) {
+        int index = buscarIndicePorId(id);
+        if (index < 0) {
+            return "Medicamento no encontrado.";
+        }
+        medicamentos.set(index, newData);
+        guardarMedicamentos();
+        return "Medicamento actualizado correctamente.";
+    }
+
+    private int buscarIndicePorId(long id) {
+        for (int i = 0; i < medicamentos.size(); i++) {
+            if (medicamentos.get(i).getNumId() == id) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     @Override
     public String eliminarPorNombre(String name) {
         medicamentos.removeIf(medicamento -> medicamento.getNombre().equals(name));
