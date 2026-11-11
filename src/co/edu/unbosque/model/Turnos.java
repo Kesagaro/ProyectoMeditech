@@ -4,7 +4,7 @@ public class Turnos {
     private int turnoActual;
 
     public Turnos() {
-        turnoActual = 0; // Inicia el turno en 1
+        turnoActual = 1;
     }
 
     public int generarTurno() {
@@ -14,6 +14,6 @@ public class Turnos {
     }
 
     public void reiniciarTurnos() {
-        turnoActual = 1; // Reinicia el turno a 1 cuando sea necesario
+        turnoActual = 1;
     }
 }
