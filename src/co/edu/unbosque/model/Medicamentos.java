@@ -1,0 +1,71 @@
+package co.edu.unbosque.model;
+
+public class Medicamentos {
+
+	private long numId;
+	private String nombre;
+	private String empresa;
+	private float precio;
+	private int cantidad;
+
+
+
+	public Medicamentos() {
+		// TODO Auto-generated constructor stub
+	}
+
+	public Medicamentos(long numId, String nombre, String empresa, float precio, int cantidad) {
+		super();
+		this.numId = numId;
+		this.nombre = nombre;
+		this.empresa = empresa;
+		this.precio = precio;
+		this.cantidad = cantidad;
+	}
+
+	public long getNumId() {
+		return numId;
+	}
+
+	public void setNumId(long numId) {
+		this.numId = numId;
+	}
+
+	public String getNombre() {
+		return nombre;
+	}
+
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
+
+	public String getEmpresa() {
+		return empresa;
+	}
+
+	public void setEmpresa(String empresa) {
+		this.empresa = empresa;
+	}
+
+	public float getPrecio() {
+		return precio;
+	}
+
+	public void setPrecio(float precio) {
+		this.precio = precio;
+	}
+
+	public int getCantidad() {
+		return cantidad;
+	}
+
+	public void setCantidad(int cantidad) {
+		this.cantidad = cantidad;
+	}
+
+	@Override
+	public String toString() {
+		return "\nNúmero de identificación: " + numId + "\nNombre del producto: " + nombre + "\nEmpresa del producto: "
+				+ empresa + "\nPrecio: " + precio + "\nCantidad del producto: " + cantidad;
+	}
+}
