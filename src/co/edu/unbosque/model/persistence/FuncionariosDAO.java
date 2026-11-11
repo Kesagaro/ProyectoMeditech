@@ -40,6 +40,24 @@ public class FuncionariosDAO {
         return false;
     }
     
+    public boolean existeCedula(String cedula) {
+        File file = new File(FILE_PATH);
+        if (!file.exists()) {
+            return false;
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String linea;
+            while ((linea = reader.readLine()) != null) {
+                if (linea.split(",")[0].equals(cedula)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public String eliminarPorCedula(String cedula) {
         File inputFile = new File(FILE_PATH);
         File tempFile = new File(DIRECTORY + "/temp_usuarios.txt");
