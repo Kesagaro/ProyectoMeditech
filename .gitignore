@@ -16,3 +16,7 @@ data/temp_*.txt
 # Sistema operativo
 Thumbs.db
 .DS_Store
+
+# Respaldos de Astah
+*.asta.bak
+*.asta.lock
