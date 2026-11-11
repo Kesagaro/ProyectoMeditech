@@ -17,18 +17,22 @@ public class ClaseX {
         this.ordenDAO = new OrdenDAO();
     }
 
-    public void agregarMedicamento(long id, String nombre, String empresa, float precio, int cantidad) {
+    public String agregarMedicamento(long id, String nombre, String empresa, float precio, int cantidad) {
+        if (medicamentoDAO.existeId(id)) {
+            return "Ya existe un medicamento con el ID " + id + ".";
+        }
         MedicamentoDTO medicamento = new MedicamentoDTO(id, nombre, empresa, precio, cantidad);
         medicamentoDAO.crear(medicamento);
+        return "Medicamento agregado con éxito.";
     }
 
     public String listarMedicamentos() {
         return medicamentoDAO.mostrar();
     }
 
-    public String actualizarMedicamento(int index, long id, String nombre, String empresa, float precio, int cantidad) {
+    public String actualizarMedicamento(long id, String nombre, String empresa, float precio, int cantidad) {
         MedicamentoDTO medicamentoActualizado = new MedicamentoDTO(id, nombre, empresa, precio, cantidad);
-        return medicamentoDAO.actualizar(index, medicamentoActualizado);
+        return medicamentoDAO.actualizarPorId(id, medicamentoActualizado);
     }
 
     public String eliminarMedicamentoPorNombre(String nombre) {

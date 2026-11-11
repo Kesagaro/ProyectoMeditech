@@ -91,35 +91,48 @@ public class Controller {
 	}
 
 	private void agregarMedicamento() {
-		try {
-			long id = Long.parseLong(view.getPanelInventario().getIdField().getText());
-			String nombre = view.getPanelInventario().getNombreField().getText();
-			String empresa = view.getPanelInventario().getEmpresaField().getText();
-			float precio = Float.parseFloat(view.getPanelInventario().getPrecioField().getText());
-			int cantidad = Integer.parseInt(view.getPanelInventario().getCantidadField().getText());
-
-			claseX.agregarMedicamento(id, nombre, empresa, precio, cantidad);
-			JOptionPane.showMessageDialog(view, "Medicamento agregado con éxito.");
-		} catch (NumberFormatException e) {
-			JOptionPane.showMessageDialog(view, "Error en los datos ingresados. Verifique e intente nuevamente.");
-		}
+		guardarMedicamento(false);
 	}
 
 	private void actualizarMedicamento() {
-		try {
-			int index = Integer.parseInt(view.getPanelInventario().getIdField().getText()) - 1; // Ejemplo de index
-																								// basado en ID
-			long id = Long.parseLong(view.getPanelInventario().getIdField().getText());
-			String nombre = view.getPanelInventario().getNombreField().getText();
-			String empresa = view.getPanelInventario().getEmpresaField().getText();
-			float precio = Float.parseFloat(view.getPanelInventario().getPrecioField().getText());
-			int cantidad = Integer.parseInt(view.getPanelInventario().getCantidadField().getText());
+		guardarMedicamento(true);
+	}
 
-			String result = claseX.actualizarMedicamento(index, id, nombre, empresa, precio, cantidad);
-			JOptionPane.showMessageDialog(view, result);
-		} catch (NumberFormatException e) {
-			JOptionPane.showMessageDialog(view, "Error en los datos ingresados. Verifique e intente nuevamente.");
+	private void guardarMedicamento(boolean actualizar) {
+		PanelInventario panel = view.getPanelInventario();
+		if (hayCamposVacios(panel.getIdField(), panel.getNombreField(), panel.getEmpresaField(),
+				panel.getPrecioField(), panel.getCantidadField())) {
+			JOptionPane.showMessageDialog(view, "Todos los campos son obligatorios.");
+			return;
 		}
+		try {
+			long id = Long.parseLong(panel.getIdField().getText().trim());
+			String nombre = panel.getNombreField().getText().trim();
+			String empresa = panel.getEmpresaField().getText().trim();
+			float precio = Float.parseFloat(panel.getPrecioField().getText().trim());
+			int cantidad = Integer.parseInt(panel.getCantidadField().getText().trim());
+
+			if (precio < 0 || cantidad < 0) {
+				JOptionPane.showMessageDialog(view, "El precio y la cantidad no pueden ser negativos.");
+				return;
+			}
+
+			String resultado = actualizar
+					? claseX.actualizarMedicamento(id, nombre, empresa, precio, cantidad)
+					: claseX.agregarMedicamento(id, nombre, empresa, precio, cantidad);
+			JOptionPane.showMessageDialog(view, resultado);
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(view, "ID, precio y cantidad deben ser números válidos.");
+		}
+	}
+
+	private boolean hayCamposVacios(JTextField... campos) {
+		for (JTextField campo : campos) {
+			if (campo.getText().isBlank()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void generarYMostrarTurno() {
