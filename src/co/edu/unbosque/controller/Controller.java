@@ -60,13 +60,25 @@ public class Controller {
 	}
 	
 	private void agregarOrden() {
-	    String documento = view.getPanelUsuarios().getDocumentoField().getText();
-	    String codigoEntidad = view.getPanelUsuarios().getCodigoEntidadField().getText();
-	    String nombreMedicamento = view.getPanelUsuarios().getNombreMedicamentoField().getText();
-	    int cantidad = Integer.parseInt(view.getPanelUsuarios().getCantidadField().getText());
-
-	    claseX.agregarOrden(documento, codigoEntidad, nombreMedicamento, cantidad);
-	    JOptionPane.showMessageDialog(view, "Orden agregada exitosamente.");
+		PanelUsuarios panel = view.getPanelUsuarios();
+		if (hayCamposVacios(panel.getDocumentoField(), panel.getCodigoEntidadField(),
+				panel.getNombreMedicamentoField(), panel.getCantidadField())) {
+			JOptionPane.showMessageDialog(view, "Todos los campos son obligatorios.");
+			return;
+		}
+		try {
+			int cantidad = Integer.parseInt(panel.getCantidadField().getText().trim());
+			if (cantidad <= 0) {
+				JOptionPane.showMessageDialog(view, "La cantidad debe ser mayor que cero.");
+				return;
+			}
+			claseX.agregarOrden(panel.getDocumentoField().getText().trim(),
+					panel.getCodigoEntidadField().getText().trim(),
+					panel.getNombreMedicamentoField().getText().trim(), cantidad);
+			JOptionPane.showMessageDialog(view, "Orden agregada exitosamente.");
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(view, "La cantidad debe ser un número entero.");
+		}
 	}
 	
 	private void verOrdenes() {
