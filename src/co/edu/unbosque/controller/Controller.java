@@ -153,9 +153,13 @@ public class Controller {
 	}
 
 	private void loginUsuario() {
-		String cedula = view.getPanelLogin().getCedula();
+		String cedula = view.getPanelLogin().getCedula().trim();
 		String password = view.getPanelLogin().getPassword();
 
+		if (cedula.isEmpty() || password.isEmpty()) {
+			JOptionPane.showMessageDialog(view, "Ingrese cédula y contraseña.");
+			return;
+		}
 		if (usuarioDAO.verificarUsuario(cedula, password)) {
 			showPanelMenu();
 		} else {
@@ -164,8 +168,17 @@ public class Controller {
 	}
 
 	private void registrarUsuario() {
-		String cedula = view.getPanelRegistro().getCedula();
+		String cedula = view.getPanelRegistro().getCedula().trim();
 		String password = view.getPanelRegistro().getPassword();
+
+		if (cedula.isEmpty() || password.isEmpty()) {
+			JOptionPane.showMessageDialog(view, "Cédula y contraseña son obligatorias.");
+			return;
+		}
+		if (usuarioDAO.existeCedula(cedula)) {
+			JOptionPane.showMessageDialog(view, "Ya existe un funcionario registrado con esa cédula.");
+			return;
+		}
 
 		FuncionarioDTO usuario = new FuncionarioDTO(cedula, password);
 		usuarioDAO.guardarUsuario(usuario.getCedula(), usuario.getPassword());
