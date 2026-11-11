@@ -1,0 +1,7 @@
+{
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "files.encoding": "utf8",
+  "files.exclude": {
+    "bin": true
+  }
+}
