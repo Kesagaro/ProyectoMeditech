@@ -24,6 +24,8 @@ public class Controller {
 	private void initController() {
 		view.getPanelInventario().getAgregarButton().addActionListener(e -> agregarMedicamento());
 		view.getPanelInventario().getActualizarButton().addActionListener(e -> actualizarMedicamento());
+		view.getPanelInventario().getEliminarButton().addActionListener(e -> eliminarMedicamento());
+		view.getPanelInventario().getListarButton().addActionListener(e -> listarMedicamentos());
 		view.getPanelInventario().getAtrasButton().addActionListener(e -> showPanelMenu());
 
 		view.getPanelInicio().getLoginButton().addActionListener(e -> showPanelLogin());
@@ -136,6 +138,30 @@ public class Controller {
 		} catch (NumberFormatException e) {
 			JOptionPane.showMessageDialog(view, "ID, precio y cantidad deben ser números válidos.");
 		}
+	}
+
+	private void eliminarMedicamento() {
+		String texto = view.getPanelInventario().getIdField().getText().trim();
+		if (texto.isEmpty()) {
+			JOptionPane.showMessageDialog(view, "Ingrese el ID del medicamento a eliminar.");
+			return;
+		}
+		try {
+			long id = Long.parseLong(texto);
+			int opcion = JOptionPane.showConfirmDialog(view, "¿Eliminar el medicamento con ID " + id + "?",
+					"Confirmar", JOptionPane.YES_NO_OPTION);
+			if (opcion == JOptionPane.YES_OPTION) {
+				JOptionPane.showMessageDialog(view, claseX.eliminarMedicamento(id));
+				listarMedicamentos();
+			}
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(view, "El ID debe ser un número válido.");
+		}
+	}
+
+	private void listarMedicamentos() {
+		view.getPanelInventario().getAreaMedicamentos().setText(claseX.listarMedicamentos());
+		view.getPanelInventario().getAreaMedicamentos().setCaretPosition(0);
 	}
 
 	private boolean hayCamposVacios(JTextField... campos) {
