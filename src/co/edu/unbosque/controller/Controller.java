@@ -174,8 +174,12 @@ public class Controller {
 	}
 
 	private void generarYMostrarTurno() {
-		int turno = turnos.generarTurno();
-		view.getPanelTurno().mostrarTurno(turno);
+		String cedula = view.getPanelTurno().getCedula().trim();
+		if (cedula.isEmpty()) {
+			JOptionPane.showMessageDialog(view, "Ingrese la cédula del paciente.");
+			return;
+		}
+		view.getPanelTurno().mostrarTurno(turnos.generarTurno(), cedula);
 	}
 
 	private void loginUsuario() {
