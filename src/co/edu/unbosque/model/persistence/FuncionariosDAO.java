@@ -95,7 +95,13 @@ public class FuncionariosDAO {
         try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
             String linea;
             while ((linea = reader.readLine()) != null) {
-                usuarios.append(linea).append("\n");
+                String[] datos = linea.split(",");
+                if (datos[0].isEmpty()) continue;
+                // nunca se muestra la contraseña (datos[1])
+                usuarios.append("Cédula: ").append(datos[0])
+                        .append(" | Nombre: ").append(datos.length > 2 ? datos[2] : "-")
+                        .append(" | Correo: ").append(datos.length > 3 ? datos[3] : "-")
+                        .append("\n");
             }
         } catch (IOException e) {
             e.printStackTrace();
