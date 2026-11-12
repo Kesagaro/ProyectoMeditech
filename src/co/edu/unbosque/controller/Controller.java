@@ -41,6 +41,11 @@ public class Controller {
 		view.getPanelMenu().getTurnoButton().addActionListener(e -> showPanelTurno());
 		view.getPanelMenu().getReporButton().addActionListener(e -> showPanelReport());
 		view.getPanelMenu().getFuncionariosButton().addActionListener(e -> showPanelFuncionarios());
+		view.getPanelMenu().getMediButton().addActionListener(e -> view.showPanelMedicina());
+
+		view.getPanelMedicina().getBuscarButton().addActionListener(e -> buscarMedicamento());
+		view.getPanelMedicina().getBuscarField().addActionListener(e -> buscarMedicamento());
+		view.getPanelMedicina().getAtrasButton().addActionListener(e -> showPanelMenu());
 
 		view.getPanelTurno().getTurnoButton().addActionListener(e -> generarYMostrarTurno());
 		view.getPanelTurno().getAtrasButton().addActionListener(e -> showPanelMenu());
@@ -157,6 +162,17 @@ public class Controller {
 		} catch (NumberFormatException e) {
 			JOptionPane.showMessageDialog(view, "El ID debe ser un número válido.");
 		}
+	}
+
+	private void buscarMedicamento() {
+		PanelMedicina panel = view.getPanelMedicina();
+		String texto = panel.getBuscarField().getText().trim();
+		if (texto.isEmpty()) {
+			JOptionPane.showMessageDialog(view, "Ingrese el nombre del medicamento a buscar.");
+			return;
+		}
+		panel.getAreaResultados().setText(claseX.buscarMedicamentos(texto));
+		panel.getAreaResultados().setCaretPosition(0);
 	}
 
 	private void listarMedicamentos() {

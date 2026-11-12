@@ -76,4 +76,8 @@ public class PanelMenu extends JPanel {
 	public PersonalButton getFuncionariosButton() {
 		return funcionariosButton;
 	}
+
+	public PersonalButton getMediButton() {
+		return mediButton;
+	}
 }
