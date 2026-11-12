@@ -196,9 +196,19 @@ public class Controller {
 	private void registrarUsuario() {
 		String cedula = view.getPanelRegistro().getCedula().trim();
 		String password = view.getPanelRegistro().getPassword();
+		String nombre = view.getPanelRegistro().getNombre().trim();
+		String correo = view.getPanelRegistro().getCorreo().trim();
 
-		if (cedula.isEmpty() || password.isEmpty()) {
-			JOptionPane.showMessageDialog(view, "Cédula y contraseña son obligatorias.");
+		if (cedula.isEmpty() || password.isEmpty() || nombre.isEmpty() || correo.isEmpty()) {
+			JOptionPane.showMessageDialog(view, "Todos los campos son obligatorios.");
+			return;
+		}
+		if ((cedula + password + nombre + correo).contains(",")) {
+			JOptionPane.showMessageDialog(view, "Los datos no pueden contener comas.");
+			return;
+		}
+		if (!correo.matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+")) {
+			JOptionPane.showMessageDialog(view, "Ingrese un correo válido.");
 			return;
 		}
 		if (usuarioDAO.existeCedula(cedula)) {
@@ -206,8 +216,7 @@ public class Controller {
 			return;
 		}
 
-		FuncionarioDTO usuario = new FuncionarioDTO(cedula, password);
-		usuarioDAO.guardarUsuario(usuario.getCedula(), usuario.getPassword());
+		usuarioDAO.guardarUsuario(new FuncionarioDTO(cedula, password, nombre, correo));
 
 		JOptionPane.showMessageDialog(view, "Usuario registrado con éxito.");
 		showPanelInicio();

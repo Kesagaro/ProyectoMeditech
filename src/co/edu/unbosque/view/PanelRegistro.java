@@ -106,4 +106,12 @@ public class PanelRegistro extends JPanel {
 	public String getPassword() {
 		return new String(passwordField.getPassword());
 	}
+
+	public String getNombre() {
+		return nombreField.getText();
+	}
+
+	public String getCorreo() {
+		return correoField.getText();
+	}
 }
