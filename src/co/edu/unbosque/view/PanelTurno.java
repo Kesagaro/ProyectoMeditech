@@ -11,6 +11,7 @@ public class PanelTurno extends JPanel {
 	private TransparentPanel glassPanel;
 	private JLabel cedulaLabel;
 	private JLabel turnoLabel;
+	private JLabel pacienteLabel;
 
 	public PanelTurno() {
 		setLayout(null);
@@ -37,11 +38,16 @@ public class PanelTurno extends JPanel {
         atrasButton.setBounds(75, 200, 150, 40); 
         glassPanel.add(atrasButton);
         
-        turnoLabel = new JLabel(""); 
-        turnoLabel.setBounds(75, 80, 150, 30); 
-        turnoLabel.setFont(new Font("Arial", Font.BOLD, 30)); 
+        turnoLabel = new JLabel("", SwingConstants.CENTER);
+        turnoLabel.setBounds(20, 60, 260, 36);
+        turnoLabel.setFont(new Font("Arial", Font.BOLD, 30));
         turnoLabel.setForeground(Color.BLACK);
         glassPanel.add(turnoLabel);
+
+        pacienteLabel = new JLabel("", SwingConstants.CENTER);
+        pacienteLabel.setBounds(20, 98, 260, 24);
+        pacienteLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        glassPanel.add(pacienteLabel);
 
         add(glassPanel);
     }
@@ -68,8 +74,10 @@ public class PanelTurno extends JPanel {
 		return cedulaField.getText();
 	}
 	
-	public void mostrarTurno(int turno) {
-        turnoLabel.setText("Turno: " + turno); 
-    }
+	public void mostrarTurno(int turno, String cedula) {
+		turnoLabel.setText("Turno: " + turno);
+		pacienteLabel.setText("Paciente CC " + cedula);
+		cedulaField.setText("");
+	}
 
 }
