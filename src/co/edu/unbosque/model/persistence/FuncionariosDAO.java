@@ -11,14 +11,14 @@ public class FuncionariosDAO {
     private static final String DIRECTORY = "data";
     private static final String FILE_PATH = DIRECTORY + "/usuarios.txt";
 
-    public void guardarUsuario(String cedula, String password) {
+    public void guardarUsuario(FuncionarioDTO funcionario) {
         File directory = new File(DIRECTORY);
         if (!directory.exists()) {
             directory.mkdirs();
         }
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
-            writer.write(cedula + "," + password);
+            writer.write(funcionario.toString());
             writer.newLine();
         } catch (IOException e) {
             e.printStackTrace();
@@ -30,7 +30,8 @@ public class FuncionariosDAO {
             String linea;
             while ((linea = reader.readLine()) != null) {
                 String[] datos = linea.split(",");
-                if (datos.length == 2 && datos[0].equals(cedula) && datos[1].equals(password)) {
+                // líneas antiguas: cedula,password; actuales: cedula,password,nombre,correo
+                if (datos.length >= 2 && datos[0].equals(cedula) && datos[1].equals(password)) {
                     return true;
                 }
             }
