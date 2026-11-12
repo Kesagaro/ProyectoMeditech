@@ -27,7 +27,12 @@ public class ClaseX {
     }
 
     public String listarMedicamentos() {
-        return medicamentoDAO.mostrar();
+        String listado = medicamentoDAO.mostrar();
+        return listado.isEmpty() ? "No hay medicamentos registrados." : listado;
+    }
+
+    public String eliminarMedicamento(long id) {
+        return medicamentoDAO.eliminarPorId(id);
     }
 
     public String actualizarMedicamento(long id, String nombre, String empresa, float precio, int cantidad) {

@@ -1,6 +1,7 @@
 package co.edu.unbosque.view;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -10,6 +11,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
@@ -19,6 +22,9 @@ public class PanelInventario extends JPanel {
 	private PersonalButton actualizarButton;
 	private PersonalButton agregarButton;
 	private PersonalButton atrasButton;
+	private PersonalButton eliminarButton;
+	private PersonalButton listarButton;
+	private JTextArea areaMedicamentos;
 
 	private JTextField idField;
 	private JTextField nombreField;
@@ -37,7 +43,7 @@ public class PanelInventario extends JPanel {
 
 		glassPanel = new TransparentPanel();
 		glassPanel.setLayout(null);
-		glassPanel.setBounds(100, 50, 300, 300);
+		glassPanel.setBounds(25, 50, 485, 390);
 
 		// etiqueta y campo ID
 		idLabel = new JLabel("Numero ID:");
@@ -84,15 +90,26 @@ public class PanelInventario extends JPanel {
 		atrasButton.setBounds(5, 5, 100, 40);
 		add(atrasButton);
 
-		actualizarButton = new PersonalButton("Actualizar");
-		actualizarButton.setBounds(50, 170, 120, 30);
-		glassPanel.add(actualizarButton);
+		agregarButton = boton("Agregar", 15);
+		actualizarButton = boton("Actualizar", 130);
+		eliminarButton = boton("Eliminar", 245);
+		listarButton = boton("Listar", 360);
 
-		agregarButton = new PersonalButton("Agregar");
-		agregarButton.setBounds(50, 220, 120, 30);
-		glassPanel.add(agregarButton);
+		areaMedicamentos = new JTextArea();
+		areaMedicamentos.setEditable(false);
+		JScrollPane scrollPane = new JScrollPane(areaMedicamentos);
+		scrollPane.setBounds(15, 220, 455, 155);
+		glassPanel.add(scrollPane);
 
 		add(glassPanel);
+	}
+
+	private PersonalButton boton(String texto, int x) {
+		PersonalButton boton = new PersonalButton(texto);
+		boton.setFont(new Font("Garlic", Font.BOLD, 14));
+		boton.setBounds(x, 175, 110, 32);
+		glassPanel.add(boton);
+		return boton;
 	}
 
 	protected void paintComponent(Graphics g) {
@@ -115,6 +132,18 @@ public class PanelInventario extends JPanel {
 	
 	public PersonalButton getAtrasButton() {
 		return atrasButton;
+	}
+
+	public PersonalButton getEliminarButton() {
+		return eliminarButton;
+	}
+
+	public PersonalButton getListarButton() {
+		return listarButton;
+	}
+
+	public JTextArea getAreaMedicamentos() {
+		return areaMedicamentos;
 	}
 
 	public JTextField getIdField() {

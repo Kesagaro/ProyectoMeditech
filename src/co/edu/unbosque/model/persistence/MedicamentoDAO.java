@@ -57,6 +57,16 @@ public class MedicamentoDAO implements Crud<MedicamentoDTO> {
         return "Medicamento actualizado correctamente.";
     }
 
+    public String eliminarPorId(long id) {
+        int index = buscarIndicePorId(id);
+        if (index < 0) {
+            return "Medicamento no encontrado.";
+        }
+        medicamentos.remove(index);
+        guardarMedicamentos();
+        return "Medicamento eliminado correctamente.";
+    }
+
     private int buscarIndicePorId(long id) {
         for (int i = 0; i < medicamentos.size(); i++) {
             if (medicamentos.get(i).getNumId() == id) {
