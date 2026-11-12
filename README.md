@@ -8,9 +8,10 @@ Nació como proyecto académico y se está refactorizando por ciclos (ver [Roadm
 
 ## Funcionalidades
 
-- Registro e inicio de sesión de funcionarios
-- Inventario: agregar y actualizar medicamentos
-- Generación de turnos de atención
+- Registro (cédula, nombre, correo) e inicio de sesión de funcionarios
+- Inventario: agregar, actualizar, listar y eliminar medicamentos por ID
+- Búsqueda de medicamentos por nombre con precio y stock
+- Generación de turnos de atención asociados a la cédula del paciente
 - Registro y consulta de órdenes de pacientes
 - Listado y eliminación de funcionarios
 - Reportes: Top 5 de medicamentos y órdenes
@@ -73,7 +74,7 @@ Modelo editable en Astah: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/Bos
 ## Roadmap
 
 - [x] **Ciclo 1: Bugs críticos.** Listeners duplicados, turnos desde 1, actualizar por ID real, validación de entradas, cédulas únicas.
-- [ ] **Ciclo 2: Funciones incompletas.** Listar y eliminar inventario, guardar nombre y correo en el registro, cédula en turnos, botón "Medicina".
+- [x] **Ciclo 2: Funciones incompletas.** Listar y eliminar inventario, guardar nombre y correo en el registro, cédula en turnos, botón "Medicina".
 - [ ] **Ciclo 3: Lógica de negocio.** Las órdenes validan y descuentan stock; Top 5 calculado con datos reales.
 - [ ] **Ciclo 4: Limpieza.** Nombres claros, código muerto fuera, recursos cargados con `getResource()`.
 - [ ] **Ciclo 5: Seguridad y datos.** Contraseñas con hash y sal; CSV robusto.
