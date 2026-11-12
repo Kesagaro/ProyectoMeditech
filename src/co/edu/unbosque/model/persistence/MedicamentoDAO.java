@@ -57,6 +57,17 @@ public class MedicamentoDAO implements Crud<MedicamentoDTO> {
         return "Medicamento actualizado correctamente.";
     }
 
+    public List<MedicamentoDTO> buscarPorNombre(String texto) {
+        String buscado = texto.toLowerCase();
+        List<MedicamentoDTO> encontrados = new ArrayList<>();
+        for (MedicamentoDTO medicamento : medicamentos) {
+            if (medicamento.getNombre().toLowerCase().contains(buscado)) {
+                encontrados.add(medicamento);
+            }
+        }
+        return encontrados;
+    }
+
     public String eliminarPorId(long id) {
         int index = buscarIndicePorId(id);
         if (index < 0) {

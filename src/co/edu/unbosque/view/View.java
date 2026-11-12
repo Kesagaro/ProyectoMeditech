@@ -15,6 +15,7 @@ public class View extends JFrame {
     private PanelUsuarios panelUsuarios;
     private CardLayout cardLayout;
     private PanelFuncionarios panelFuncionarios;
+    private PanelMedicina panelMedicina;
     private JPanel mainPanel;
 
     public View() {
@@ -33,6 +34,7 @@ public class View extends JFrame {
         panelTop5 = new PanelTop5(); 
         panelUsuarios = new PanelUsuarios(); 
         panelFuncionarios = new PanelFuncionarios();
+        panelMedicina = new PanelMedicina();
 
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
@@ -47,6 +49,7 @@ public class View extends JFrame {
         mainPanel.add(panelTop5, "PanelTop5"); 
         mainPanel.add(panelUsuarios, "PanelUsuarios"); 
         mainPanel.add(panelFuncionarios, "PanelFuncionarios");
+        mainPanel.add(panelMedicina, "PanelMedicina");
 
         add(mainPanel);
         setVisible(true);
@@ -90,6 +93,14 @@ public class View extends JFrame {
     
     public PanelFuncionarios getPanelFuncionarios() {
     	return panelFuncionarios;
+    }
+
+    public PanelMedicina getPanelMedicina() {
+        return panelMedicina;
+    }
+
+    public void showPanelMedicina() {
+        cardLayout.show(mainPanel, "PanelMedicina");
     }
 
 

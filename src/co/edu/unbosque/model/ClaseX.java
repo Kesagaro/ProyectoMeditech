@@ -31,6 +31,18 @@ public class ClaseX {
         return listado.isEmpty() ? "No hay medicamentos registrados." : listado;
     }
 
+    public String buscarMedicamentos(String texto) {
+        StringBuilder resultado = new StringBuilder();
+        for (MedicamentoDTO m : medicamentoDAO.buscarPorNombre(texto)) {
+            resultado.append("ID ").append(m.getNumId())
+                    .append(" | ").append(m.getNombre())
+                    .append(" | ").append(m.getEmpresa())
+                    .append(" | Precio: ").append(m.getPrecio())
+                    .append(" | Stock: ").append(m.getCantidad()).append("\n");
+        }
+        return resultado.length() == 0 ? "No se encontraron medicamentos con \"" + texto + "\"." : resultado.toString();
+    }
+
     public String eliminarMedicamento(long id) {
         return medicamentoDAO.eliminarPorId(id);
     }
