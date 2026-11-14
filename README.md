@@ -12,9 +12,9 @@ Nació como proyecto académico y se está refactorizando por ciclos (ver [Roadm
 - Inventario: agregar, actualizar, listar y eliminar medicamentos por ID
 - Búsqueda de medicamentos por nombre con precio y stock
 - Generación de turnos de atención asociados a la cédula del paciente
-- Registro y consulta de órdenes de pacientes
+- Órdenes de pacientes que validan el medicamento y el stock disponible, y lo descuentan del inventario
 - Listado y eliminación de funcionarios
-- Reportes: Top 5 de medicamentos y órdenes
+- Reportes: Top 5 de medicamentos más expendidos, calculado con las órdenes registradas
 
 ## Capturas
 
@@ -67,7 +67,7 @@ Modelo editable en Astah: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/Bos
 
 | Archivo | Formato | Contenido |
 |---|---|---|
-| `data/usuarios.txt` | texto `cedula,password` | Funcionarios |
+| `data/usuarios.txt` | texto `cedula,password,nombre,correo` | Funcionarios |
 | `data/Medicamentos.txt` | serialización Java | Inventario |
 | `data/ordenes.txt` | texto `documento,entidad,medicamento,cantidad` | Órdenes |
 
@@ -75,7 +75,7 @@ Modelo editable en Astah: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/Bos
 
 - [x] **Ciclo 1: Bugs críticos.** Listeners duplicados, turnos desde 1, actualizar por ID real, validación de entradas, cédulas únicas.
 - [x] **Ciclo 2: Funciones incompletas.** Listar y eliminar inventario, guardar nombre y correo en el registro, cédula en turnos, botón "Medicina".
-- [ ] **Ciclo 3: Lógica de negocio.** Las órdenes validan y descuentan stock; Top 5 calculado con datos reales.
+- [x] **Ciclo 3: Lógica de negocio.** Las órdenes validan y descuentan stock; Top 5 calculado con datos reales.
 - [ ] **Ciclo 4: Limpieza.** Nombres claros, código muerto fuera, recursos cargados con `getResource()`.
 - [ ] **Ciclo 5: Seguridad y datos.** Contraseñas con hash y sal; CSV robusto.
 - [ ] **Ciclo 6: Pruebas.** JUnit para DAO, turnos y reglas de negocio.
