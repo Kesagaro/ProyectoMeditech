@@ -6,8 +6,8 @@ import java.awt.*;
 public class PanelReport extends JPanel {
     private JLabel titleLabel;
     private  PersonalButton atrasButton;
-    private  PersonalButton Top5Button;
-    private  PersonalButton UsuariosButton;
+    private  PersonalButton top5Button;
+    private  PersonalButton ordenesButton;
     private TransparentPanel glassPanel;
 
     public PanelReport() {
@@ -18,16 +18,16 @@ public class PanelReport extends JPanel {
         glassPanel.setLayout(null); 
         glassPanel.setBounds(100, 50, 300, 300);
        
-        Top5Button = new PersonalButton(" Top ventas ");
-        Top5Button.setBounds(60, 100, 180, 30); 
-        glassPanel.add(Top5Button);
+        top5Button = new PersonalButton(" Top ventas ");
+        top5Button.setBounds(60, 100, 180, 30); 
+        glassPanel.add(top5Button);
         
-        UsuariosButton = new PersonalButton("Usuarios");
-        UsuariosButton.setBounds(60, 150, 180, 30); 
-        glassPanel.add(UsuariosButton);
+        ordenesButton = new PersonalButton("Órdenes");
+        ordenesButton.setBounds(60, 150, 180, 30); 
+        glassPanel.add(ordenesButton);
         
 
-        atrasButton = new PersonalButton("Atras");
+        atrasButton = new PersonalButton("Atrás");
 		atrasButton.setBounds(5, 5, 100, 40);
 		add(atrasButton);
         
@@ -50,13 +50,13 @@ public class PanelReport extends JPanel {
     }
 
 
-	public PersonalButton getUsuariosButton() {
+	public PersonalButton getOrdenesButton() {
 		
-		return UsuariosButton;
+		return ordenesButton;
 	}
 
 	public PersonalButton getTop5Button() {
 		
-		return Top5Button;
+		return top5Button;
 	}
 }

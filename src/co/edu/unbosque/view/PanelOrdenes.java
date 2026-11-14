@@ -3,7 +3,7 @@ package co.edu.unbosque.view;
 import javax.swing.*;
 import java.awt.*;
 
-public class PanelUsuarios extends JPanel {
+public class PanelOrdenes extends JPanel {
 	private TransparentPanel glassPanel;
 	private JTextField documentoField;
 	private JTextField entidadField;
@@ -14,7 +14,7 @@ public class PanelUsuarios extends JPanel {
 	private JTextArea areaOrdenes;
 	private PersonalButton atrasButton;
 
-	public PanelUsuarios() {
+	public PanelOrdenes() {
 		setLayout(null);
 
 		glassPanel = new TransparentPanel();

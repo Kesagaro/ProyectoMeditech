@@ -11,11 +11,11 @@ public class Controller {
 	private View view;
 	private FuncionariosDAO usuarioDAO;
 	private Turnos turnos;
-	private ClaseX claseX;
+	private Farmacia farmacia;
 
 	public Controller(View view) {
 		this.view = view;
-		this.claseX = new ClaseX();
+		this.farmacia = new Farmacia();
 		this.usuarioDAO = new FuncionariosDAO();
 		this.turnos = new Turnos();
 		initController();
@@ -51,14 +51,14 @@ public class Controller {
 		view.getPanelTurno().getAtrasButton().addActionListener(e -> showPanelMenu());
 
 		view.getPanelReport().getTop5Button().addActionListener(e -> showPanelTop5());
-		view.getPanelReport().getUsuariosButton().addActionListener(e -> showPanelUsuarios());
+		view.getPanelReport().getOrdenesButton().addActionListener(e -> showPanelOrdenes());
 		view.getPanelReport().getAtrasButton().addActionListener(e -> showPanelMenu());
 
 		view.getPanelTop5().getAtrasButton().addActionListener(e -> showPanelReport());
 
-		view.getPanelUsuarios().getAtrasButton().addActionListener(e -> showPanelReport());
-		view.getPanelUsuarios().getAgregarOrdenButton().addActionListener(e -> agregarOrden());
-	    view.getPanelUsuarios().getVerOrdenesButton().addActionListener(e -> verOrdenes());
+		view.getPanelOrdenes().getAtrasButton().addActionListener(e -> showPanelReport());
+		view.getPanelOrdenes().getAgregarOrdenButton().addActionListener(e -> agregarOrden());
+	    view.getPanelOrdenes().getVerOrdenesButton().addActionListener(e -> verOrdenes());
 
 		view.getPanelFuncionarios().getAtrasButton().addActionListener(e -> showPanelMenu());
 		view.getPanelFuncionarios().getListarButton().addActionListener(e -> listarFuncionarios());
@@ -67,7 +67,7 @@ public class Controller {
 	}
 	
 	private void agregarOrden() {
-		PanelUsuarios panel = view.getPanelUsuarios();
+		PanelOrdenes panel = view.getPanelOrdenes();
 		if (hayCamposVacios(panel.getDocumentoField(), panel.getCodigoEntidadField(),
 				panel.getNombreMedicamentoField(), panel.getCantidadField())) {
 			JOptionPane.showMessageDialog(view, "Todos los campos son obligatorios.");
@@ -86,26 +86,26 @@ public class Controller {
 				JOptionPane.showMessageDialog(view, "La cantidad debe ser mayor que cero.");
 				return;
 			}
-			JOptionPane.showMessageDialog(view, claseX.agregarOrden(documento, entidad, medicamento, cantidad));
+			JOptionPane.showMessageDialog(view, farmacia.agregarOrden(documento, entidad, medicamento, cantidad));
 		} catch (NumberFormatException e) {
 			JOptionPane.showMessageDialog(view, "La cantidad debe ser un número entero.");
 		}
 	}
 	
 	private void verOrdenes() {
-	    String ordenes = claseX.listarOrdenes();
-	    view.getPanelUsuarios().getAreaOrdenes().setText(ordenes);
+	    String ordenes = farmacia.listarOrdenes();
+	    view.getPanelOrdenes().getAreaOrdenes().setText(ordenes);
 	}
 
 	private void listarFuncionarios() {
-		String usuarios = claseX.listarUsuarios();
+		String usuarios = farmacia.listarUsuarios();
 		view.getPanelFuncionarios().getAreaFuncionarios().setText(usuarios);
 	}
 
 	private void eliminarFuncionario() {
 		String cedula = JOptionPane.showInputDialog(view, "Ingrese la cédula del funcionario a eliminar:");
 		if (cedula != null && !cedula.isEmpty()) {
-			String resultado = claseX.eliminarUsuarioPorCedula(cedula);
+			String resultado = farmacia.eliminarUsuarioPorCedula(cedula);
 			JOptionPane.showMessageDialog(view, resultado);
 			listarFuncionarios(); // Refresca la lista después de eliminar
 		} else {
@@ -141,8 +141,8 @@ public class Controller {
 			}
 
 			String resultado = actualizar
-					? claseX.actualizarMedicamento(id, nombre, empresa, precio, cantidad)
-					: claseX.agregarMedicamento(id, nombre, empresa, precio, cantidad);
+					? farmacia.actualizarMedicamento(id, nombre, empresa, precio, cantidad)
+					: farmacia.agregarMedicamento(id, nombre, empresa, precio, cantidad);
 			JOptionPane.showMessageDialog(view, resultado);
 		} catch (NumberFormatException e) {
 			JOptionPane.showMessageDialog(view, "ID, precio y cantidad deben ser números válidos.");
@@ -160,7 +160,7 @@ public class Controller {
 			int opcion = JOptionPane.showConfirmDialog(view, "¿Eliminar el medicamento con ID " + id + "?",
 					"Confirmar", JOptionPane.YES_NO_OPTION);
 			if (opcion == JOptionPane.YES_OPTION) {
-				JOptionPane.showMessageDialog(view, claseX.eliminarMedicamento(id));
+				JOptionPane.showMessageDialog(view, farmacia.eliminarMedicamento(id));
 				listarMedicamentos();
 			}
 		} catch (NumberFormatException e) {
@@ -175,12 +175,12 @@ public class Controller {
 			JOptionPane.showMessageDialog(view, "Ingrese el nombre del medicamento a buscar.");
 			return;
 		}
-		panel.getAreaResultados().setText(claseX.buscarMedicamentos(texto));
+		panel.getAreaResultados().setText(farmacia.buscarMedicamentos(texto));
 		panel.getAreaResultados().setCaretPosition(0);
 	}
 
 	private void listarMedicamentos() {
-		view.getPanelInventario().getAreaMedicamentos().setText(claseX.listarMedicamentos());
+		view.getPanelInventario().getAreaMedicamentos().setText(farmacia.listarMedicamentos());
 		view.getPanelInventario().getAreaMedicamentos().setCaretPosition(0);
 	}
 
@@ -275,12 +275,12 @@ public class Controller {
 	}
 
 	private void showPanelTop5() {
-		view.getPanelTop5().mostrarReporte(claseX.top5Medicamentos());
+		view.getPanelTop5().mostrarReporte(farmacia.top5Medicamentos());
 		view.showPanelTop5();
 	}
 
-	private void showPanelUsuarios() {
-		view.showPanelUsuarios();
+	private void showPanelOrdenes() {
+		view.showPanelOrdenes();
 	}
 
 	private void showPanelFuncionarios() {
