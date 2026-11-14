@@ -5,7 +5,6 @@ import java.awt.*;
 
 public class PanelTurno extends JPanel {
 	private JTextField cedulaField;
-	private JPasswordField passwordField;
 	private PersonalButton turnoButton;
 	private PersonalButton atrasButton;
 	private TransparentPanel glassPanel;

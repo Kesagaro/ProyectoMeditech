@@ -56,10 +56,6 @@ public class ClaseX {
         MedicamentoDTO medicamentoActualizado = new MedicamentoDTO(id, nombre, empresa, precio, cantidad);
         return medicamentoDAO.actualizarPorId(id, medicamentoActualizado);
     }
-
-    public String eliminarMedicamentoPorNombre(String nombre) {
-        return medicamentoDAO.eliminarPorNombre(nombre);
-    }
     
     public String listarUsuarios() {
         return usuarioDAO.mostrarUsuarios();

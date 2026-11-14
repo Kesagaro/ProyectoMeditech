@@ -5,7 +5,6 @@ import java.awt.*;
 
 public class PanelUsuarios extends JPanel {
 	private TransparentPanel glassPanel;
-	private JTextArea areaCliente;
 	private JTextField documentoField;
 	private JTextField entidadField;
 	private JTextField nombreMedicamentoField;
