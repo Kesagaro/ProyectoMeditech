@@ -73,16 +73,20 @@ public class Controller {
 			JOptionPane.showMessageDialog(view, "Todos los campos son obligatorios.");
 			return;
 		}
+		String documento = panel.getDocumentoField().getText().trim();
+		String entidad = panel.getCodigoEntidadField().getText().trim();
+		String medicamento = panel.getNombreMedicamentoField().getText().trim();
+		if ((documento + entidad + medicamento).contains(",")) {
+			JOptionPane.showMessageDialog(view, "Los datos no pueden contener comas.");
+			return;
+		}
 		try {
 			int cantidad = Integer.parseInt(panel.getCantidadField().getText().trim());
 			if (cantidad <= 0) {
 				JOptionPane.showMessageDialog(view, "La cantidad debe ser mayor que cero.");
 				return;
 			}
-			claseX.agregarOrden(panel.getDocumentoField().getText().trim(),
-					panel.getCodigoEntidadField().getText().trim(),
-					panel.getNombreMedicamentoField().getText().trim(), cantidad);
-			JOptionPane.showMessageDialog(view, "Orden agregada exitosamente.");
+			JOptionPane.showMessageDialog(view, claseX.agregarOrden(documento, entidad, medicamento, cantidad));
 		} catch (NumberFormatException e) {
 			JOptionPane.showMessageDialog(view, "La cantidad debe ser un número entero.");
 		}

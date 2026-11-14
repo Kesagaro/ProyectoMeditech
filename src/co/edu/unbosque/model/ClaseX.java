@@ -64,9 +64,19 @@ public class ClaseX {
         return usuarioDAO.eliminarPorCedula(cedula);
     }
     
-    public void agregarOrden(String documento, String codigoEntidad, String nombreMedicamento, int cantidad) {
-        OrdenDTO orden = new OrdenDTO(documento, codigoEntidad, nombreMedicamento, cantidad);
-        ordenDAO.agregarOrden(orden);
+    public String agregarOrden(String documento, String codigoEntidad, String nombreMedicamento, int cantidad) {
+        MedicamentoDTO medicamento = medicamentoDAO.buscarPorNombreExacto(nombreMedicamento);
+        if (medicamento == null) {
+            return "No existe el medicamento \"" + nombreMedicamento + "\" en el inventario.";
+        }
+        if (medicamento.getCantidad() < cantidad) {
+            return "Stock insuficiente: quedan " + medicamento.getCantidad() + " unidades de "
+                    + medicamento.getNombre() + ".";
+        }
+        medicamentoDAO.descontarStock(medicamento, cantidad);
+        ordenDAO.agregarOrden(new OrdenDTO(documento, codigoEntidad, medicamento.getNombre(), cantidad));
+        return "Orden agregada. Stock restante de " + medicamento.getNombre() + ": "
+                + medicamento.getCantidad() + ".";
     }
     
     public String listarOrdenes() {
@@ -77,6 +87,6 @@ public class ClaseX {
                    .append(", Medicamento: ").append(orden.getNombreMedicamento())
                    .append(", Cantidad: ").append(orden.getCantidadMedicamento()).append("\n");
         }
-        return listado.toString();
+        return listado.length() == 0 ? "No hay órdenes registradas." : listado.toString();
     }
 }
