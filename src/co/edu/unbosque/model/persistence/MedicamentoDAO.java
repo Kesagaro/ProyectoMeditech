@@ -68,6 +68,20 @@ public class MedicamentoDAO implements Crud<MedicamentoDTO> {
         return encontrados;
     }
 
+    public MedicamentoDTO buscarPorNombreExacto(String nombre) {
+        for (MedicamentoDTO medicamento : medicamentos) {
+            if (medicamento.getNombre().equalsIgnoreCase(nombre)) {
+                return medicamento;
+            }
+        }
+        return null;
+    }
+
+    public void descontarStock(MedicamentoDTO medicamento, int cantidad) {
+        medicamento.setCantidad(medicamento.getCantidad() - cantidad);
+        guardarMedicamentos();
+    }
+
     public String eliminarPorId(long id) {
         int index = buscarIndicePorId(id);
         if (index < 0) {
