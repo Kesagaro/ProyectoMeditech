@@ -6,6 +6,11 @@ import co.edu.unbosque.model.persistence.FuncionariosDAO;
 import co.edu.unbosque.model.persistence.OrdenDAO;
 import co.edu.unbosque.model.persistence.OrdenDTO;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 public class ClaseX {
     private MedicamentoDAO medicamentoDAO;
     private FuncionariosDAO usuarioDAO;
@@ -79,6 +84,25 @@ public class ClaseX {
                 + medicamento.getCantidad() + ".";
     }
     
+    public String top5Medicamentos() {
+        Map<String, Integer> totales = new LinkedHashMap<>();
+        for (OrdenDTO orden : ordenDAO.listarOrdenes()) {
+            totales.merge(orden.getNombreMedicamento(), orden.getCantidadMedicamento(), Integer::sum);
+        }
+        if (totales.isEmpty()) {
+            return "Aún no hay órdenes registradas.";
+        }
+        List<Map.Entry<String, Integer>> ranking = new ArrayList<>(totales.entrySet());
+        ranking.sort(Map.Entry.<String, Integer>comparingByValue().reversed());
+
+        StringBuilder reporte = new StringBuilder("Top 5 medicamentos más expendidos:\n\n");
+        for (int i = 0; i < Math.min(5, ranking.size()); i++) {
+            reporte.append(i + 1).append(". ").append(ranking.get(i).getKey())
+                    .append(" - Cantidad expendida: ").append(ranking.get(i).getValue()).append("\n");
+        }
+        return reporte.toString();
+    }
+
     public String listarOrdenes() {
         StringBuilder listado = new StringBuilder();
         for (OrdenDTO orden : ordenDAO.listarOrdenes()) {

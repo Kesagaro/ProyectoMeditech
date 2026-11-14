@@ -275,6 +275,7 @@ public class Controller {
 	}
 
 	private void showPanelTop5() {
+		view.getPanelTop5().mostrarReporte(claseX.top5Medicamentos());
 		view.showPanelTop5();
 	}
 
