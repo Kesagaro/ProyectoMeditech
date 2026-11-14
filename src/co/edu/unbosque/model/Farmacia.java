@@ -11,12 +11,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ClaseX {
+public class Farmacia {
     private MedicamentoDAO medicamentoDAO;
     private FuncionariosDAO usuarioDAO;
     private OrdenDAO ordenDAO;
 
-    public ClaseX() {
+    public Farmacia() {
         this.medicamentoDAO = new MedicamentoDAO();
         this.usuarioDAO = new FuncionariosDAO();
         this.ordenDAO = new OrdenDAO();

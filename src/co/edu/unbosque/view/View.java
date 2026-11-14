@@ -12,7 +12,7 @@ public class View extends JFrame {
     private PanelTurno panelTurno;
     private PanelReport panelReport;
     private PanelTop5 panelTop5;
-    private PanelUsuarios panelUsuarios;
+    private PanelOrdenes panelOrdenes;
     private CardLayout cardLayout;
     private PanelFuncionarios panelFuncionarios;
     private PanelMedicina panelMedicina;
@@ -32,7 +32,7 @@ public class View extends JFrame {
         panelTurno = new PanelTurno();
         panelReport = new PanelReport();
         panelTop5 = new PanelTop5(); 
-        panelUsuarios = new PanelUsuarios(); 
+        panelOrdenes = new PanelOrdenes(); 
         panelFuncionarios = new PanelFuncionarios();
         panelMedicina = new PanelMedicina();
 
@@ -47,7 +47,7 @@ public class View extends JFrame {
         mainPanel.add(panelTurno, "PanelTurno");
         mainPanel.add(panelReport, "PanelReport");
         mainPanel.add(panelTop5, "PanelTop5"); 
-        mainPanel.add(panelUsuarios, "PanelUsuarios"); 
+        mainPanel.add(panelOrdenes, "PanelOrdenes"); 
         mainPanel.add(panelFuncionarios, "PanelFuncionarios");
         mainPanel.add(panelMedicina, "PanelMedicina");
 
@@ -87,8 +87,8 @@ public class View extends JFrame {
         return panelTop5;
     }
 
-    public PanelUsuarios getPanelUsuarios() {
-        return panelUsuarios;
+    public PanelOrdenes getPanelOrdenes() {
+        return panelOrdenes;
     }
     
     public PanelFuncionarios getPanelFuncionarios() {
@@ -140,7 +140,7 @@ public class View extends JFrame {
         cardLayout.show(mainPanel, "PanelTop5");
     }
 
-    public void showPanelUsuarios() {
-        cardLayout.show(mainPanel, "PanelUsuarios");
+    public void showPanelOrdenes() {
+        cardLayout.show(mainPanel, "PanelOrdenes");
     }
 }
