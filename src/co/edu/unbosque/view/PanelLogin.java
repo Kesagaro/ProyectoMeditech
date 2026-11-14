@@ -36,7 +36,7 @@ public class PanelLogin extends JPanel {
         glassPanel.add(passwordField);
         
 
-        loginButton = new PersonalButton("Login");
+        loginButton = new PersonalButton("Ingresar");
         loginButton.setBounds(75, 120, 150, 40); 
         glassPanel.add(loginButton);
 

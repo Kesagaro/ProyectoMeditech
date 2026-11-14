@@ -41,7 +41,7 @@ public class PanelInventario extends JPanel {
 		glassPanel.setBounds(25, 50, 485, 390);
 
 		// etiqueta y campo ID
-		idLabel = new JLabel("Numero ID:");
+		idLabel = new JLabel("Número ID:");
 		idLabel.setBounds(50, 20, 80, 25);
 		glassPanel.add(idLabel);
 		idField = new JTextField(15);
@@ -81,7 +81,7 @@ public class PanelInventario extends JPanel {
 		glassPanel.add(cantidadField);
 
 		// Botones
-		atrasButton = new PersonalButton("Atras");
+		atrasButton = new PersonalButton("Atrás");
 		atrasButton.setBounds(5, 5, 100, 40);
 		add(atrasButton);
 
