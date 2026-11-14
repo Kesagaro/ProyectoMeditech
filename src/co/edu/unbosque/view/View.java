@@ -19,7 +19,7 @@ public class View extends JFrame {
     private JPanel mainPanel;
 
     public View() {
-        setTitle("bosqueFarma");
+        setTitle("BosqueFarma");
         setSize(550, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
