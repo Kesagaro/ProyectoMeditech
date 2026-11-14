@@ -56,7 +56,7 @@ java -cp bin co.edu.unbosque.controller.Main
 ```
 src/co/edu/unbosque/
 ├── controller/          Main (punto de entrada) y Controller (eventos vista → modelo)
-├── model/               ClaseX (fachada del modelo), Turnos, Medicamentos
+├── model/               Farmacia (fachada del modelo) y Turnos
 │   └── persistence/     DAO y DTO de funcionarios, medicamentos y órdenes; interfaz Crud<T>
 └── view/                View (JFrame + CardLayout) y un panel por pantalla
 ```
@@ -80,7 +80,7 @@ Modelo editable en Astah: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/Bos
 - [x] **Ciclo 1: Bugs críticos.** Listeners duplicados, turnos desde 1, actualizar por ID real, validación de entradas, cédulas únicas.
 - [x] **Ciclo 2: Funciones incompletas.** Listar y eliminar inventario, guardar nombre y correo en el registro, cédula en turnos, botón "Medicina".
 - [x] **Ciclo 3: Lógica de negocio.** Las órdenes validan y descuentan stock; Top 5 calculado con datos reales.
-- [ ] **Ciclo 4: Limpieza.** Nombres claros, código muerto fuera, recursos cargados con `getResource()`.
+- [x] **Ciclo 4: Limpieza.** Nombres claros, código muerto fuera, recursos cargados con `getResource()`.
 - [ ] **Ciclo 5: Seguridad y datos.** Contraseñas con hash y sal; CSV robusto.
 - [ ] **Ciclo 6: Pruebas.** JUnit para DAO, turnos y reglas de negocio.
 
