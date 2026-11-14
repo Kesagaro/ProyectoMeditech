@@ -18,15 +18,14 @@ public class PanelInicio extends JPanel {
     // Agregar un espaciador en la parte superior
     glassPanel.add(Box.createRigidArea(new Dimension(0, 20))); // Espacio de 20 píxeles
 
-    //imagen
-    ImageIcon imageIcon = new ImageIcon("src/BosqueFarma.png"); // la ruta de la imagen
-    Image img = imageIcon.getImage(); // Obtener la imagen
-    Image newImg = img.getScaledInstance(200, 100, Image.SCALE_SMOOTH); // Redimensionar la imagen
-    imageIcon = new ImageIcon(newImg); // Crear un nuevo ImageIcon con la imagen redimensionada
-
-    JLabel imageLabel = new JLabel(imageIcon, SwingConstants.CENTER);
-    imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT); // Alinear la imagen al centro
-    glassPanel.add(imageLabel); // Agregar la imagen al panel de vidrio
+    // Logo cargado desde el classpath para no depender de la carpeta de ejecución
+    java.net.URL logo = getClass().getResource("/BosqueFarma.png");
+    if (logo != null) {
+        Image img = new ImageIcon(logo).getImage().getScaledInstance(200, 100, Image.SCALE_SMOOTH);
+        JLabel imageLabel = new JLabel(new ImageIcon(img), SwingConstants.CENTER);
+        imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        glassPanel.add(imageLabel);
+    }
 
     // Crear botones con estilos
     loginButton = new PersonalButton("Iniciar");

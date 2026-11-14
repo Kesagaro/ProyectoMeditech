@@ -37,10 +37,14 @@ Usuario de demostración: cédula `112233`, contraseña `112233`.
 
 ### Desde la terminal
 
-Desde la raíz del proyecto (la app usa rutas relativas a `data/` y `src/`):
+Desde la raíz del proyecto (los datos se guardan en `data/`, relativo a esa carpeta):
 
 ```bash
 javac -encoding UTF-8 -d bin $(find src -name "*.java")
+```
+
+```bash
+cp src/BosqueFarma.png bin/
 ```
 
 ```bash
