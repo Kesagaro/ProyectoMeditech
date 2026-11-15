@@ -71,7 +71,7 @@ Modelo editable en Astah: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/Bos
 
 | Archivo | Formato | Contenido |
 |---|---|---|
-| `data/usuarios.txt` | texto `cedula,password,nombre,correo` | Funcionarios |
+| `data/usuarios.txt` | texto `cedula,hash,nombre,correo` | Funcionarios; la contraseña se guarda como hash PBKDF2 con sal |
 | `data/Medicamentos.txt` | serialización Java | Inventario |
 | `data/ordenes.txt` | texto `documento,entidad,medicamento,cantidad` | Órdenes |
 
@@ -81,7 +81,7 @@ Modelo editable en Astah: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/Bos
 - [x] **Ciclo 2: Funciones incompletas.** Listar y eliminar inventario, guardar nombre y correo en el registro, cédula en turnos, botón "Medicina".
 - [x] **Ciclo 3: Lógica de negocio.** Las órdenes validan y descuentan stock; Top 5 calculado con datos reales.
 - [x] **Ciclo 4: Limpieza.** Nombres claros, código muerto fuera, recursos cargados con `getResource()`.
-- [ ] **Ciclo 5: Seguridad y datos.** Contraseñas con hash y sal; CSV robusto.
+- [x] **Ciclo 5: Seguridad y datos.** Contraseñas con hash y sal; CSV robusto.
 - [ ] **Ciclo 6: Pruebas.** JUnit para DAO, turnos y reglas de negocio.
 
 ## Documentación
