@@ -1,111 +1,161 @@
 package co.edu.unbosque.model.persistence;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.security.spec.KeySpec;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
+/**
+ * Funcionarios en data/usuarios.txt, una línea por funcionario: cedula,contraseña,nombre,correo.
+ * La contraseña se guarda como hash PBKDF2 con sal aleatoria: pbkdf2$iteraciones$sal$hash.
+ * Las líneas antiguas (contraseña en texto plano, con o sin nombre y correo) se aceptan y se
+ * convierten a hash la primera vez que el funcionario inicia sesión.
+ */
 public class FuncionariosDAO {
-    private static final String DIRECTORY = "data";
-    private static final String FILE_PATH = DIRECTORY + "/usuarios.txt";
+    private static final Path ARCHIVO = Paths.get("data", "usuarios.txt");
+    private static final String PREFIJO_HASH = "pbkdf2$";
+    private static final int ITERACIONES = 65536;
+    private static final int BYTES_SAL = 16;
+    private static final int BITS_HASH = 256;
+    private static final SecureRandom ALEATORIO = new SecureRandom();
 
     public void guardarUsuario(FuncionarioDTO funcionario) {
-        File directory = new File(DIRECTORY);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
-            writer.write(funcionario.toString());
-            writer.newLine();
+        String linea = String.join(",", funcionario.getCedula(), hashear(funcionario.getPassword()),
+                funcionario.getNombre(), funcionario.getCorreo());
+        try {
+            Files.createDirectories(ARCHIVO.getParent());
+            Files.writeString(ARCHIVO, linea + System.lineSeparator(), StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error al guardar el funcionario: " + e.getMessage());
         }
     }
 
     public boolean verificarUsuario(String cedula, String password) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
-            String linea;
-            while ((linea = reader.readLine()) != null) {
-                String[] datos = linea.split(",");
-                // líneas antiguas: cedula,password; actuales: cedula,password,nombre,correo
-                if (datos.length >= 2 && datos[0].equals(cedula) && datos[1].equals(password)) {
-                    return true;
-                }
+        List<String> lineas = leerLineas();
+        for (int i = 0; i < lineas.size(); i++) {
+            String[] datos = lineas.get(i).split(",", -1);
+            if (datos.length < 2 || !datos[0].equals(cedula)) {
+                continue;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            if (datos[1].startsWith(PREFIJO_HASH)) {
+                return coincide(password, datos[1]);
+            }
+            // contraseña antigua en texto plano: si coincide, se reemplaza por su hash
+            if (!datos[1].equals(password)) {
+                return false;
+            }
+            datos[1] = hashear(password);
+            lineas.set(i, String.join(",", datos));
+            escribirLineas(lineas);
+            return true;
         }
         return false;
     }
-    
+
     public boolean existeCedula(String cedula) {
-        File file = new File(FILE_PATH);
-        if (!file.exists()) {
-            return false;
-        }
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String linea;
-            while ((linea = reader.readLine()) != null) {
-                if (linea.split(",")[0].equals(cedula)) {
-                    return true;
-                }
+        for (String linea : leerLineas()) {
+            if (linea.split(",", -1)[0].equals(cedula)) {
+                return true;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return false;
     }
 
     public String eliminarPorCedula(String cedula) {
-        File inputFile = new File(FILE_PATH);
-        File tempFile = new File(DIRECTORY + "/temp_usuarios.txt");
-        boolean eliminado = false;
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-             BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
-
-            String linea;
-            while ((linea = reader.readLine()) != null) {
-                String[] datos = linea.split(",");
-                if (datos[0].equals(cedula)) {
-                    eliminado = true;
-                    continue; // Omitir la línea para eliminar el usuario
-                }
-                writer.write(linea);
-                writer.newLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        List<String> lineas = leerLineas();
+        boolean eliminado = lineas.removeIf(linea -> linea.split(",", -1)[0].equals(cedula));
+        if (!eliminado) {
+            return "Usuario no encontrado.";
         }
-
-        if (eliminado && inputFile.delete()) {
-            tempFile.renameTo(inputFile);
-            return "Usuario eliminado con éxito.";
-        } else {
-            tempFile.delete();
-            return "Usuario no encontrado o error al eliminar.";
-        }
+        return escribirLineas(lineas) ? "Usuario eliminado con éxito." : "Error al eliminar el usuario.";
     }
-    
+
     public String mostrarUsuarios() {
         StringBuilder usuarios = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
-            String linea;
-            while ((linea = reader.readLine()) != null) {
-                String[] datos = linea.split(",");
-                if (datos[0].isEmpty()) continue;
-                // nunca se muestra la contraseña (datos[1])
-                usuarios.append("Cédula: ").append(datos[0])
-                        .append(" | Nombre: ").append(datos.length > 2 ? datos[2] : "-")
-                        .append(" | Correo: ").append(datos.length > 3 ? datos[3] : "-")
-                        .append("\n");
+        for (String linea : leerLineas()) {
+            String[] datos = linea.split(",", -1);
+            if (datos.length < 2 || datos[0].isBlank()) {
+                continue;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            // nunca se muestra la contraseña (datos[1])
+            usuarios.append("Cédula: ").append(datos[0])
+                    .append(" | Nombre: ").append(datos.length > 2 ? datos[2] : "-")
+                    .append(" | Correo: ").append(datos.length > 3 ? datos[3] : "-")
+                    .append("\n");
         }
         return usuarios.toString();
+    }
+
+    private List<String> leerLineas() {
+        if (!Files.exists(ARCHIVO)) {
+            return new ArrayList<>();
+        }
+        try {
+            List<String> lineas = new ArrayList<>(Files.readAllLines(ARCHIVO, StandardCharsets.UTF_8));
+            lineas.removeIf(String::isBlank);
+            return lineas;
+        } catch (IOException e) {
+            System.err.println("Error al leer los funcionarios: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /** Escribe en un archivo temporal y luego lo reemplaza, para no dejar el original a medias. */
+    private boolean escribirLineas(List<String> lineas) {
+        Path temporal = ARCHIVO.resolveSibling("temp_usuarios.txt");
+        try {
+            Files.write(temporal, lineas, StandardCharsets.UTF_8);
+            Files.move(temporal, ARCHIVO, StandardCopyOption.REPLACE_EXISTING);
+            return true;
+        } catch (IOException e) {
+            System.err.println("Error al actualizar los funcionarios: " + e.getMessage());
+            return false;
+        }
+    }
+
+    private static String hashear(String password) {
+        byte[] sal = new byte[BYTES_SAL];
+        ALEATORIO.nextBytes(sal);
+        Base64.Encoder b64 = Base64.getEncoder();
+        return PREFIJO_HASH + ITERACIONES + "$" + b64.encodeToString(sal) + "$"
+                + b64.encodeToString(pbkdf2(password, sal, ITERACIONES));
+    }
+
+    private static boolean coincide(String password, String guardado) {
+        String[] partes = guardado.split("\\$");
+        if (partes.length != 4) {
+            return false;
+        }
+        try {
+            int iteraciones = Integer.parseInt(partes[1]);
+            byte[] sal = Base64.getDecoder().decode(partes[2]);
+            byte[] esperado = Base64.getDecoder().decode(partes[3]);
+            // comparación en tiempo constante
+            return MessageDigest.isEqual(esperado, pbkdf2(password, sal, iteraciones));
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    private static byte[] pbkdf2(String password, byte[] sal, int iteraciones) {
+        try {
+            KeySpec spec = new PBEKeySpec(password.toCharArray(), sal, iteraciones, BITS_HASH);
+            return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(spec).getEncoded();
+        } catch (Exception e) {
+            throw new IllegalStateException("PBKDF2 no disponible", e);
+        }
     }
 }
