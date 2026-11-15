@@ -114,6 +114,7 @@ public class MedicamentoDAO implements Crud<MedicamentoDTO> {
     }
 
     private void guardarMedicamentos() {
+        new File(DIRECTORY).mkdirs();
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_PATH))) {
             oos.writeObject(medicamentos);
         } catch (IOException e) {
@@ -127,10 +128,14 @@ public class MedicamentoDAO implements Crud<MedicamentoDTO> {
         if (!file.exists()) {
             return new ArrayList<>();
         }
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILE_PATH))) {
+        try (FileInputStream fis = new FileInputStream(file); ObjectInputStream ois = new ObjectInputStream(fis)) {
             return (List<MedicamentoDTO>) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (IOException | ClassNotFoundException | ClassCastException e) {
+            // se aparta el archivo dañado para que el próximo guardado no borre el inventario
+            File respaldo = new File(DIRECTORY, "Medicamentos.danado-" + System.currentTimeMillis() + ".txt");
+            boolean apartado = file.renameTo(respaldo);
+            System.err.println("No se pudo leer el inventario (" + e.getMessage() + "). "
+                    + (apartado ? "Se guardó una copia en " + respaldo.getPath() : "No se pudo respaldar el archivo."));
             return new ArrayList<>();
         }
     }
