@@ -6,10 +6,17 @@ import java.util.List;
 
 public class MedicamentoDAO implements Crud<MedicamentoDTO> {
     private List<MedicamentoDTO> medicamentos;
-    private static final String DIRECTORY = "data";
-    private static final String FILE_PATH = DIRECTORY + "/Medicamentos.txt";
-    
+    private final File directorio;
+    private final File archivo;
+
     public MedicamentoDAO() {
+        this(new File("data"));
+    }
+
+    /** Permite usar otra carpeta de datos, por ejemplo una temporal en las pruebas. */
+    public MedicamentoDAO(File directorio) {
+        this.directorio = directorio;
+        this.archivo = new File(directorio, "Medicamentos.txt");
         medicamentos = cargarMedicamentos();
     }
 
@@ -114,8 +121,8 @@ public class MedicamentoDAO implements Crud<MedicamentoDTO> {
     }
 
     private void guardarMedicamentos() {
-        new File(DIRECTORY).mkdirs();
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_PATH))) {
+        directorio.mkdirs();
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(archivo))) {
             oos.writeObject(medicamentos);
         } catch (IOException e) {
             e.printStackTrace();
@@ -124,7 +131,7 @@ public class MedicamentoDAO implements Crud<MedicamentoDTO> {
 
     @SuppressWarnings("unchecked")
     private List<MedicamentoDTO> cargarMedicamentos() {
-        File file = new File(FILE_PATH);
+        File file = archivo;
         if (!file.exists()) {
             return new ArrayList<>();
         }
@@ -132,7 +139,7 @@ public class MedicamentoDAO implements Crud<MedicamentoDTO> {
             return (List<MedicamentoDTO>) ois.readObject();
         } catch (IOException | ClassNotFoundException | ClassCastException e) {
             // se aparta el archivo dañado para que el próximo guardado no borre el inventario
-            File respaldo = new File(DIRECTORY, "Medicamentos.danado-" + System.currentTimeMillis() + ".txt");
+            File respaldo = new File(directorio, "Medicamentos.danado-" + System.currentTimeMillis() + ".txt");
             boolean apartado = file.renameTo(respaldo);
             System.err.println("No se pudo leer el inventario (" + e.getMessage() + "). "
                     + (apartado ? "Se guardó una copia en " + respaldo.getPath() : "No se pudo respaldar el archivo."));
