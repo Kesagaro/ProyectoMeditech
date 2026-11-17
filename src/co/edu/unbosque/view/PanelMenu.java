@@ -17,22 +17,22 @@ public class PanelMenu extends JPanel {
 
 		glassPanel = new TransparentPanel();
 		glassPanel.setLayout(null);
-		glassPanel.setBounds(100, 50, 300, 300);
+		glassPanel.setBounds(70, 50, 400, 300);
 
 		inventarioButton = new PersonalButton("Inventario");
-		inventarioButton.setBounds(5, 120, 140, 30);
+		inventarioButton.setBounds(15, 125, 180, 36);
 		glassPanel.add(inventarioButton);
 
 		turnoButton = new PersonalButton("Turno");
-		turnoButton.setBounds(80, 80, 140, 30);
+		turnoButton.setBounds(110, 75, 180, 36);
 		glassPanel.add(turnoButton);
 
 		funcionariosButton = new PersonalButton("Funcionarios");
-		funcionariosButton.setBounds(155, 120, 140, 30);
+		funcionariosButton.setBounds(205, 125, 180, 36);
 		glassPanel.add(funcionariosButton);
 
 		mediButton = new PersonalButton("Medicina");
-		mediButton.setBounds(5, 160, 140, 30);
+		mediButton.setBounds(15, 175, 180, 36);
 		glassPanel.add(mediButton);
 
 		atrasButton = new PersonalButton("Atrás");
@@ -40,7 +40,7 @@ public class PanelMenu extends JPanel {
 		add(atrasButton);
 
 		reporButton = new PersonalButton("Reportes");
-		reporButton.setBounds(155, 160, 140, 30);
+		reporButton.setBounds(205, 175, 180, 36);
 		glassPanel.add(reporButton);
 
 		add(glassPanel);

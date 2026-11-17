@@ -95,11 +95,13 @@ public class Controller {
 	private void verOrdenes() {
 	    String ordenes = farmacia.listarOrdenes();
 	    view.getPanelOrdenes().getAreaOrdenes().setText(ordenes);
+	    view.getPanelOrdenes().getAreaOrdenes().setCaretPosition(0);
 	}
 
 	private void listarFuncionarios() {
 		String usuarios = farmacia.listarUsuarios();
 		view.getPanelFuncionarios().getAreaFuncionarios().setText(usuarios);
+		view.getPanelFuncionarios().getAreaFuncionarios().setCaretPosition(0);
 	}
 
 	private void eliminarFuncionario() {

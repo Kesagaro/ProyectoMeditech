@@ -19,57 +19,59 @@ public class PanelOrdenes extends JPanel {
 
 		glassPanel = new TransparentPanel();
 		glassPanel.setLayout(null);
-		glassPanel.setBounds(100, 50, 350, 380);
+		glassPanel.setBounds(25, 50, 485, 390);
 
 		JLabel documentoLabel = new JLabel("Documento del paciente:");
-		documentoLabel.setBounds(10, 20, 200, 25);
+		documentoLabel.setBounds(15, 15, 190, 26);
 		glassPanel.add(documentoLabel);
 
 		documentoField = new JTextField();
-		documentoField.setBounds(180, 20, 150, 25);
+		documentoField.setBounds(210, 15, 260, 26);
 		glassPanel.add(documentoField);
 
 		JLabel codigoEntidadLabel = new JLabel("Código de la entidad:");
-		codigoEntidadLabel.setBounds(10, 60, 200, 25);
+		codigoEntidadLabel.setBounds(15, 50, 190, 26);
 		glassPanel.add(codigoEntidadLabel);
 
 		entidadField = new JTextField();
-		entidadField.setBounds(180, 60, 150, 25);
+		entidadField.setBounds(210, 50, 260, 26);
 		glassPanel.add(entidadField);
 
 		JLabel nombreMedicamentoLabel = new JLabel("Nombre del medicamento:");
-		nombreMedicamentoLabel.setBounds(10, 100, 200, 25);
+		nombreMedicamentoLabel.setBounds(15, 85, 190, 26);
 		glassPanel.add(nombreMedicamentoLabel);
 
 		nombreMedicamentoField = new JTextField();
-		nombreMedicamentoField.setBounds(180, 100, 150, 25);
+		nombreMedicamentoField.setBounds(210, 85, 260, 26);
 		glassPanel.add(nombreMedicamentoField);
 
 		JLabel cantidadLabel = new JLabel("Cantidad:");
-		cantidadLabel.setBounds(10, 140, 200, 25);
+		cantidadLabel.setBounds(15, 120, 190, 26);
 		glassPanel.add(cantidadLabel);
 
 		cantidadField = new JTextField();
-		cantidadField.setBounds(180, 140, 150, 25);
+		cantidadField.setBounds(210, 120, 260, 26);
 		glassPanel.add(cantidadField);
 
-		agregarButton = new PersonalButton("Agregar Orden");
-		agregarButton.setBounds(10, 180, 150, 25);
+		agregarButton = new PersonalButton("Agregar orden");
+		agregarButton.setBounds(15, 160, 220, 36);
 		glassPanel.add(agregarButton);
 
-		verOrdenesButton = new PersonalButton("Ver Órdenes");
-		verOrdenesButton.setBounds(180, 180, 150, 25);
+		verOrdenesButton = new PersonalButton("Ver órdenes");
+		verOrdenesButton.setBounds(250, 160, 220, 36);
 		glassPanel.add(verOrdenesButton);
 
 		areaOrdenes = new JTextArea();
 		areaOrdenes.setEditable(false);
+		areaOrdenes.setLineWrap(true);
+		areaOrdenes.setWrapStyleWord(true);
 		JScrollPane scrollPane = new JScrollPane(areaOrdenes);
-		scrollPane.setBounds(10, 220, 320, 100);
+		scrollPane.setBounds(15, 210, 455, 165);
 		glassPanel.add(scrollPane);
 
 		atrasButton = new PersonalButton("Atrás");
-		atrasButton.setBounds(75, 330, 160, 40);
-		glassPanel.add(atrasButton);
+		atrasButton.setBounds(5, 5, 100, 40);
+		add(atrasButton);
 
 		add(glassPanel);
 	}
