@@ -4,7 +4,7 @@ Aplicación de escritorio en **Java Swing** para la gestión de una farmacia: fu
 
 Nació como proyecto académico y se está refactorizando por ciclos (ver [Roadmap](#roadmap)) para llevarlo a un código limpio, probado y documentado.
 
-![Java](https://img.shields.io/badge/Java-22%2B-orange) ![Swing](https://img.shields.io/badge/UI-Swing-blue) ![Arquitectura](https://img.shields.io/badge/arquitectura-MVC-green)
+[![CI](https://github.com/Kesagaro/ProyectoMeditech/actions/workflows/ci.yml/badge.svg)](https://github.com/Kesagaro/ProyectoMeditech/actions/workflows/ci.yml) ![Java](https://img.shields.io/badge/Java-17%2B-orange) ![Maven](https://img.shields.io/badge/build-Maven-C71A36) ![Swing](https://img.shields.io/badge/UI-Swing-blue) ![Arquitectura](https://img.shields.io/badge/arquitectura-MVC-green)
 
 ## Funcionalidades
 
@@ -32,14 +32,15 @@ Capturas tomadas de la aplicación con datos de ejemplo.
 
 ## Tecnologías
 
-- Java 22+ (probado con JDK 25)
+- Java 17+ (probado con JDK 17, 21 y 25)
 - Swing (CardLayout, componentes personalizados)
 - Persistencia en archivos: texto plano y serialización Java
-- JUnit 5 para las pruebas automáticas
+- Maven (con Maven Wrapper) y JUnit 5
+- GitHub Actions: compila y ejecuta las pruebas en cada push y pull request
 
 ## Ejecutar en VS Code
 
-1. Instalar un **JDK 22 o superior** (por ejemplo [Temurin](https://adoptium.net/)).
+1. Instalar un **JDK 17 o superior** (por ejemplo [Temurin](https://adoptium.net/)).
 2. Abrir la carpeta del proyecto en VS Code.
 3. Instalar la extensión recomendada **Extension Pack for Java** (VS Code la sugiere al abrir el proyecto).
 4. Pulsar **F5** y elegir **Ejecutar BosqueFarma**.
@@ -48,46 +49,33 @@ Usuario de demostración: cédula `112233`, contraseña `112233`.
 
 ### Desde la terminal
 
-Desde la raíz del proyecto (los datos se guardan en `data/`, relativo a esa carpeta):
+Desde la raíz del proyecto (los datos se guardan en `data/`, relativo a esa carpeta). No hace falta instalar Maven: `mvnw` lo descarga la primera vez (en Windows, `mvnw.cmd`).
 
 ```bash
-javac -encoding UTF-8 -d bin $(find src -name "*.java")
-```
-
-```bash
-cp src/BosqueFarma.png bin/
-```
-
-```bash
-java -cp bin co.edu.unbosque.controller.Main
+./mvnw compile exec:java
 ```
 
 ## Pruebas
 
-Las pruebas JUnit 5 están en `test/` y cubren los turnos, las reglas de órdenes, stock y Top 5, y la persistencia de funcionarios (hash de contraseñas y migración), medicamentos y órdenes. Cada prueba trabaja en una carpeta temporal, sin tocar `data/`.
-
-En VS Code aparecen en la vista **Testing** (ícono del matraz). Desde la terminal, después de compilar `src` como arriba:
+Las pruebas JUnit 5 están en `src/test/java` y cubren los turnos, las reglas de órdenes, stock y Top 5, y la persistencia de funcionarios (hash de contraseñas y migración), medicamentos y órdenes. Cada prueba trabaja en una carpeta temporal, sin tocar `data/`.
 
 ```bash
-javac -encoding UTF-8 -cp "bin:lib/*" -d bin-test $(find test -name "*.java")
+./mvnw test
 ```
 
-```bash
-java -jar lib/junit-platform-console-standalone-1.11.4.jar execute -cp "bin:bin-test" --scan-classpath
-```
-
-En Windows (Git Bash) se usa `;` en lugar de `:` para separar las rutas del classpath.
+En VS Code también aparecen en la vista **Testing** (ícono del matraz). GitHub Actions las ejecuta con Java 17 y 21 en cada push y pull request.
 
 ## Arquitectura (MVC)
 
 ```
-src/co/edu/unbosque/
+src/main/java/co/edu/unbosque/
 ├── controller/          Main (punto de entrada) y Controller (eventos vista → modelo)
 ├── model/               Farmacia (fachada del modelo) y Turnos
 │   └── persistence/     DAO y DTO de funcionarios, medicamentos y órdenes; interfaz Crud<T>
 └── view/                View (JFrame + CardLayout) y un panel por pantalla
 
-test/co/edu/unbosque/model/   Pruebas JUnit del modelo y la persistencia
+src/main/resources/            Logo de la aplicación
+src/test/java/co/edu/unbosque/ Pruebas JUnit del modelo y la persistencia
 ```
 
 ### Diagrama de clases
@@ -112,6 +100,15 @@ Modelo editable en Astah: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/Bos
 - [x] **Ciclo 4: Limpieza.** Nombres claros, código muerto fuera, recursos cargados con `getResource()`.
 - [x] **Ciclo 5: Seguridad y datos.** Contraseñas con hash y sal; CSV robusto.
 - [x] **Ciclo 6: Pruebas.** JUnit para DAO, turnos y reglas de negocio.
+
+### Fase 2
+
+- [x] **Ciclo 7: Maven y CI.** Estructura estándar de Maven, Maven Wrapper y GitHub Actions.
+- [ ] **Ciclo 8: Release ejecutable.** `BosqueFarma.jar` publicado en GitHub Releases.
+- [ ] **Ciclo 9: Reglas en el modelo.** Validaciones del controlador movidas al modelo, con pruebas.
+- [ ] **Ciclo 10: Mejoras funcionales.** Órdenes con fecha y total, turnos persistentes, sesión del funcionario.
+- [ ] **Ciclo 11: Presentación.** README en inglés y metadatos del repositorio.
+- [ ] **Ciclo 12: Base de datos.** Persistencia en SQLite con JDBC.
 
 ## Documentación
 
