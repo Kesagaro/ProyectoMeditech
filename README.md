@@ -18,7 +18,17 @@ Nació como proyecto académico y se está refactorizando por ciclos (ver [Roadm
 
 ## Capturas
 
-> Próximamente en `docs/img/`.
+| Inicio | Menú principal |
+|---|---|
+| ![Pantalla de inicio](docs/img/01-inicio.png) | ![Menú principal](docs/img/03-menu.png) |
+| **Inventario** | **Búsqueda de medicamentos** |
+| ![Inventario de medicamentos](docs/img/04-inventario.png) | ![Búsqueda de medicamentos por nombre](docs/img/05-busqueda.png) |
+| **Órdenes de pacientes** | **Top ventas** |
+| ![Registro y listado de órdenes](docs/img/06-ordenes.png) | ![Top 5 de medicamentos más expendidos](docs/img/07-top-ventas.png) |
+| **Turnos** | **Funcionarios** |
+| ![Turno asignado a un paciente](docs/img/08-turno.png) | ![Listado de funcionarios sin contraseñas](docs/img/09-funcionarios.png) |
+
+Capturas tomadas de la aplicación con datos de ejemplo.
 
 ## Tecnologías
 
