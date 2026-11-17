@@ -1,5 +1,6 @@
 # Compilados
 bin/
+bin-test/
 out/
 *.class
 
