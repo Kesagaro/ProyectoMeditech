@@ -25,6 +25,7 @@ Nació como proyecto académico y se está refactorizando por ciclos (ver [Roadm
 - Java 22+ (probado con JDK 25)
 - Swing (CardLayout, componentes personalizados)
 - Persistencia en archivos: texto plano y serialización Java
+- JUnit 5 para las pruebas automáticas
 
 ## Ejecutar en VS Code
 
@@ -51,6 +52,22 @@ cp src/BosqueFarma.png bin/
 java -cp bin co.edu.unbosque.controller.Main
 ```
 
+## Pruebas
+
+Las pruebas JUnit 5 están en `test/` y cubren los turnos, las reglas de órdenes, stock y Top 5, y la persistencia de funcionarios (hash de contraseñas y migración), medicamentos y órdenes. Cada prueba trabaja en una carpeta temporal, sin tocar `data/`.
+
+En VS Code aparecen en la vista **Testing** (ícono del matraz). Desde la terminal, después de compilar `src` como arriba:
+
+```bash
+javac -encoding UTF-8 -cp "bin:lib/*" -d bin-test $(find test -name "*.java")
+```
+
+```bash
+java -jar lib/junit-platform-console-standalone-1.11.4.jar execute -cp "bin:bin-test" --scan-classpath
+```
+
+En Windows (Git Bash) se usa `;` en lugar de `:` para separar las rutas del classpath.
+
 ## Arquitectura (MVC)
 
 ```
@@ -59,6 +76,8 @@ src/co/edu/unbosque/
 ├── model/               Farmacia (fachada del modelo) y Turnos
 │   └── persistence/     DAO y DTO de funcionarios, medicamentos y órdenes; interfaz Crud<T>
 └── view/                View (JFrame + CardLayout) y un panel por pantalla
+
+test/co/edu/unbosque/model/   Pruebas JUnit del modelo y la persistencia
 ```
 
 ### Diagrama de clases
@@ -82,7 +101,7 @@ Modelo editable en Astah: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/Bos
 - [x] **Ciclo 3: Lógica de negocio.** Las órdenes validan y descuentan stock; Top 5 calculado con datos reales.
 - [x] **Ciclo 4: Limpieza.** Nombres claros, código muerto fuera, recursos cargados con `getResource()`.
 - [x] **Ciclo 5: Seguridad y datos.** Contraseñas con hash y sal; CSV robusto.
-- [ ] **Ciclo 6: Pruebas.** JUnit para DAO, turnos y reglas de negocio.
+- [x] **Ciclo 6: Pruebas.** JUnit para DAO, turnos y reglas de negocio.
 
 ## Documentación
 
