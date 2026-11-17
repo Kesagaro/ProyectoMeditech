@@ -1,6 +1,6 @@
 # Compilados
+target/
 bin/
-bin-test/
 out/
 *.class
 
@@ -10,7 +10,10 @@ data/ordenes.txt
 data/temp_*.txt
 data/Medicamentos.danado-*.txt
 
-# IDE
+# IDE (VS Code y Eclipse los generan a partir de pom.xml)
+.classpath
+.project
+.settings/
 .metadata/
 *.iml
 .idea/

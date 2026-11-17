@@ -2,7 +2,6 @@
   "java.configuration.updateBuildConfiguration": "automatic",
   "files.encoding": "utf8",
   "files.exclude": {
-    "bin": true,
-    "bin-test": true
+    "target": true
   }
 }

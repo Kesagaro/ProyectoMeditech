@@ -6,7 +6,7 @@
       "name": "Ejecutar BosqueFarma",
       "request": "launch",
       "mainClass": "co.edu.unbosque.controller.Main",
-      "projectName": "Meditech",
+      "projectName": "bosquefarma",
       "cwd": "${workspaceFolder}"
     }
   ]
