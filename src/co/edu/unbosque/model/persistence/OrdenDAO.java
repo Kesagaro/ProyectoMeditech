@@ -6,11 +6,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OrdenDAO {
-	private static final String DIRECTORY = "data";
-    private static final String FILE_PATH = DIRECTORY + "/ordenes.txt";
+    private final File directorio;
+    private final File archivo;
     private List<OrdenDTO> ordenes;
 
     public OrdenDAO() {
+        this(new File("data"));
+    }
+
+    /** Permite usar otra carpeta de datos, por ejemplo una temporal en las pruebas. */
+    public OrdenDAO(File directorio) {
+        this.directorio = directorio;
+        this.archivo = new File(directorio, "ordenes.txt");
         ordenes = new ArrayList<>();
         cargarOrdenesDesdeArchivo();
     }
@@ -26,12 +33,9 @@ public class OrdenDAO {
 
     private void guardarOrdenEnArchivo(OrdenDTO orden) {
         try {
-            File directory = new File(DIRECTORY);
-            if (!directory.exists()) {
-                directory.mkdir();
-            }
+            directorio.mkdirs();
 
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_PATH, StandardCharsets.UTF_8, true))) {
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(archivo, StandardCharsets.UTF_8, true))) {
                 bw.write(orden.getDocumentoPaciente() + "," + orden.getCodigoEntidad() + ","
                         + orden.getNombreMedicamento() + "," + orden.getCantidadMedicamento());
                 bw.newLine();
@@ -42,7 +46,7 @@ public class OrdenDAO {
     }
 
     private void cargarOrdenesDesdeArchivo() {
-        File file = new File(FILE_PATH);
+        File file = archivo;
         if (!file.exists()) return;
 
         try (BufferedReader br = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
@@ -59,7 +63,7 @@ public class OrdenDAO {
                     ordenes.add(new OrdenDTO(datos[0].trim(), datos[1].trim(), datos[2].trim(), cantidad));
                 } catch (IllegalArgumentException e) {
                     // una línea dañada no impide cargar las demás
-                    System.err.println("Orden ignorada en la línea " + numero + " de " + FILE_PATH + ": " + e.getMessage());
+                    System.err.println("Orden ignorada en la línea " + numero + " de " + archivo.getPath() + ": " + e.getMessage());
                 }
             }
         } catch (IOException e) {

@@ -24,19 +24,28 @@ import javax.crypto.spec.PBEKeySpec;
  * convierten a hash la primera vez que el funcionario inicia sesión.
  */
 public class FuncionariosDAO {
-    private static final Path ARCHIVO = Paths.get("data", "usuarios.txt");
+    private final Path archivo;
     private static final String PREFIJO_HASH = "pbkdf2$";
     private static final int ITERACIONES = 65536;
     private static final int BYTES_SAL = 16;
     private static final int BITS_HASH = 256;
     private static final SecureRandom ALEATORIO = new SecureRandom();
 
+    public FuncionariosDAO() {
+        this(Paths.get("data"));
+    }
+
+    /** Permite usar otra carpeta de datos, por ejemplo una temporal en las pruebas. */
+    public FuncionariosDAO(Path directorio) {
+        this.archivo = directorio.resolve("usuarios.txt");
+    }
+
     public void guardarUsuario(FuncionarioDTO funcionario) {
         String linea = String.join(",", funcionario.getCedula(), hashear(funcionario.getPassword()),
                 funcionario.getNombre(), funcionario.getCorreo());
         try {
-            Files.createDirectories(ARCHIVO.getParent());
-            Files.writeString(ARCHIVO, linea + System.lineSeparator(), StandardCharsets.UTF_8,
+            Files.createDirectories(archivo.getParent());
+            Files.writeString(archivo, linea + System.lineSeparator(), StandardCharsets.UTF_8,
                     StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {
             System.err.println("Error al guardar el funcionario: " + e.getMessage());
@@ -100,11 +109,11 @@ public class FuncionariosDAO {
     }
 
     private List<String> leerLineas() {
-        if (!Files.exists(ARCHIVO)) {
+        if (!Files.exists(archivo)) {
             return new ArrayList<>();
         }
         try {
-            List<String> lineas = new ArrayList<>(Files.readAllLines(ARCHIVO, StandardCharsets.UTF_8));
+            List<String> lineas = new ArrayList<>(Files.readAllLines(archivo, StandardCharsets.UTF_8));
             lineas.removeIf(String::isBlank);
             return lineas;
         } catch (IOException e) {
@@ -115,10 +124,10 @@ public class FuncionariosDAO {
 
     /** Escribe en un archivo temporal y luego lo reemplaza, para no dejar el original a medias. */
     private boolean escribirLineas(List<String> lineas) {
-        Path temporal = ARCHIVO.resolveSibling("temp_usuarios.txt");
+        Path temporal = archivo.resolveSibling("temp_usuarios.txt");
         try {
             Files.write(temporal, lineas, StandardCharsets.UTF_8);
-            Files.move(temporal, ARCHIVO, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(temporal, archivo, StandardCopyOption.REPLACE_EXISTING);
             return true;
         } catch (IOException e) {
             System.err.println("Error al actualizar los funcionarios: " + e.getMessage());

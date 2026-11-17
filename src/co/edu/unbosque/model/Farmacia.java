@@ -6,6 +6,7 @@ import co.edu.unbosque.model.persistence.FuncionariosDAO;
 import co.edu.unbosque.model.persistence.OrdenDAO;
 import co.edu.unbosque.model.persistence.OrdenDTO;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,9 +18,14 @@ public class Farmacia {
     private OrdenDAO ordenDAO;
 
     public Farmacia() {
-        this.medicamentoDAO = new MedicamentoDAO();
-        this.usuarioDAO = new FuncionariosDAO();
-        this.ordenDAO = new OrdenDAO();
+        this(new File("data"));
+    }
+
+    /** Permite usar otra carpeta de datos, por ejemplo una temporal en las pruebas. */
+    public Farmacia(File directorioDatos) {
+        this.medicamentoDAO = new MedicamentoDAO(directorioDatos);
+        this.usuarioDAO = new FuncionariosDAO(directorioDatos.toPath());
+        this.ordenDAO = new OrdenDAO(directorioDatos);
     }
 
     public String agregarMedicamento(long id, String nombre, String empresa, float precio, int cantidad) {
