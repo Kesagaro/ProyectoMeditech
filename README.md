@@ -6,6 +6,14 @@ Nació como proyecto académico y se está refactorizando por ciclos (ver [Roadm
 
 [![CI](https://github.com/Kesagaro/ProyectoMeditech/actions/workflows/ci.yml/badge.svg)](https://github.com/Kesagaro/ProyectoMeditech/actions/workflows/ci.yml) ![Java](https://img.shields.io/badge/Java-17%2B-orange) ![Maven](https://img.shields.io/badge/build-Maven-C71A36) ![Swing](https://img.shields.io/badge/UI-Swing-blue) ![Arquitectura](https://img.shields.io/badge/arquitectura-MVC-green)
 
+## Descargar y probar
+
+1. Instalar **Java 17 o superior** (por ejemplo [Temurin](https://adoptium.net/)).
+2. Descargar [**BosqueFarma.jar**](https://github.com/Kesagaro/ProyectoMeditech/releases/latest/download/BosqueFarma.jar) desde la [última release](https://github.com/Kesagaro/ProyectoMeditech/releases/latest).
+3. Abrirlo con doble clic o con `java -jar BosqueFarma.jar`.
+
+La primera vez, crea tu usuario con **Registrar**. Los datos se guardan en la carpeta `data/` junto al `.jar`.
+
 ## Funcionalidades
 
 - Registro (cédula, nombre, correo) e inicio de sesión de funcionarios
@@ -54,6 +62,14 @@ Desde la raíz del proyecto (los datos se guardan en `data/`, relativo a esa car
 ```bash
 ./mvnw compile exec:java
 ```
+
+Para generar el ejecutable en `target/BosqueFarma.jar`:
+
+```bash
+./mvnw package
+```
+
+Al subir un tag con la versión de `pom.xml` (por ejemplo `v1.0.0`), GitHub Actions publica ese `.jar` en Releases.
 
 ## Pruebas
 
@@ -104,7 +120,7 @@ Modelo editable en Astah: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/Bos
 ### Fase 2
 
 - [x] **Ciclo 7: Maven y CI.** Estructura estándar de Maven, Maven Wrapper y GitHub Actions.
-- [ ] **Ciclo 8: Release ejecutable.** `BosqueFarma.jar` publicado en GitHub Releases.
+- [x] **Ciclo 8: Release ejecutable.** `BosqueFarma.jar` publicado en GitHub Releases.
 - [ ] **Ciclo 9: Reglas en el modelo.** Validaciones del controlador movidas al modelo, con pruebas.
 - [ ] **Ciclo 10: Mejoras funcionales.** Órdenes con fecha y total, turnos persistentes, sesión del funcionario.
 - [ ] **Ciclo 11: Presentación.** README en inglés y metadatos del repositorio.
