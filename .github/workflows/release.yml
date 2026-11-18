@@ -1,0 +1,40 @@
+name: Release
+
+# Al subir un tag como v1.0.0 se compila, se prueba y se publica BosqueFarma.jar en GitHub Releases.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Verificar que el tag coincide con la versión del pom
+        run: |
+          VERSION=$(./mvnw -q -B help:evaluate -Dexpression=project.version -DforceStdout)
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "El tag $GITHUB_REF_NAME no coincide con la versión $VERSION de pom.xml"
+            exit 1
+          fi
+
+      - name: Compilar, probar y empaquetar
+        run: ./mvnw -B verify
+
+      - name: Publicar la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" target/BosqueFarma.jar \
+            --title "BosqueFarma $GITHUB_REF_NAME" \
+            --notes "Descarga **BosqueFarma.jar** y ábrelo con doble clic o con \`java -jar BosqueFarma.jar\`. Requiere Java 17 o superior (por ejemplo [Temurin](https://adoptium.net/)). La primera vez, crea tu usuario con **Registrar**; los datos se guardan en la carpeta \`data/\` junto al .jar."
