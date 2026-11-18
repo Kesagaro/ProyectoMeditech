@@ -73,8 +73,8 @@ public class PanelTurno extends JPanel {
 		return cedulaField.getText();
 	}
 	
-	public void mostrarTurno(int turno, String cedula) {
-		turnoLabel.setText("Turno: " + turno);
+	public void mostrarTurno(String turno, String cedula) {
+		turnoLabel.setText(turno);
 		pacienteLabel.setText("Paciente CC " + cedula);
 		cedulaField.setText("");
 	}
