@@ -6,6 +6,7 @@ import co.edu.unbosque.model.persistence.FuncionarioDTO;
 import co.edu.unbosque.view.*;
 
 import javax.swing.*;
+import java.io.File;
 
 public class Controller {
 	private View view;
@@ -14,9 +15,13 @@ public class Controller {
 	private Farmacia farmacia;
 
 	public Controller(View view) {
+		this(view, new File("data"));
+	}
+
+	public Controller(View view, File carpetaDatos) {
 		this.view = view;
-		this.farmacia = new Farmacia();
-		this.usuarioDAO = new FuncionariosDAO();
+		this.farmacia = new Farmacia(carpetaDatos);
+		this.usuarioDAO = new FuncionariosDAO(carpetaDatos.toPath());
 		this.turnos = new Turnos();
 		initController();
 	}
