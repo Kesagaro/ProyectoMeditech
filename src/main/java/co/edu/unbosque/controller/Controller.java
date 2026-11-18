@@ -1,17 +1,18 @@
 package co.edu.unbosque.controller;
 
-import co.edu.unbosque.model.*;
-import co.edu.unbosque.model.persistence.FuncionariosDAO;
-import co.edu.unbosque.model.persistence.FuncionarioDTO;
+import co.edu.unbosque.model.Farmacia;
+import co.edu.unbosque.model.Resultado;
 import co.edu.unbosque.view.*;
 
 import javax.swing.*;
 import java.io.File;
 
+/**
+ * Conecta la vista con el modelo: lee lo que el usuario escribió, se lo pasa a {@link Farmacia}
+ * (que valida y aplica las reglas) y muestra la respuesta.
+ */
 public class Controller {
 	private View view;
-	private FuncionariosDAO usuarioDAO;
-	private Turnos turnos;
 	private Farmacia farmacia;
 
 	public Controller(View view) {
@@ -21,8 +22,6 @@ public class Controller {
 	public Controller(View view, File carpetaDatos) {
 		this.view = view;
 		this.farmacia = new Farmacia(carpetaDatos);
-		this.usuarioDAO = new FuncionariosDAO(carpetaDatos.toPath());
-		this.turnos = new Turnos();
 		initController();
 	}
 
@@ -73,28 +72,9 @@ public class Controller {
 	
 	private void agregarOrden() {
 		PanelOrdenes panel = view.getPanelOrdenes();
-		if (hayCamposVacios(panel.getDocumentoField(), panel.getCodigoEntidadField(),
-				panel.getNombreMedicamentoField(), panel.getCantidadField())) {
-			mostrarMensaje("Todos los campos son obligatorios.");
-			return;
-		}
-		String documento = panel.getDocumentoField().getText().trim();
-		String entidad = panel.getCodigoEntidadField().getText().trim();
-		String medicamento = panel.getNombreMedicamentoField().getText().trim();
-		if ((documento + entidad + medicamento).contains(",")) {
-			mostrarMensaje("Los datos no pueden contener comas.");
-			return;
-		}
-		try {
-			int cantidad = Integer.parseInt(panel.getCantidadField().getText().trim());
-			if (cantidad <= 0) {
-				mostrarMensaje("La cantidad debe ser mayor que cero.");
-				return;
-			}
-			mostrarMensaje(farmacia.agregarOrden(documento, entidad, medicamento, cantidad));
-		} catch (NumberFormatException e) {
-			mostrarMensaje("La cantidad debe ser un número entero.");
-		}
+		mostrarMensaje(farmacia.agregarOrden(panel.getDocumentoField().getText(),
+				panel.getCodigoEntidadField().getText(), panel.getNombreMedicamentoField().getText(),
+				panel.getCantidadField().getText()).mensaje());
 	}
 	
 	private void verOrdenes() {
@@ -113,16 +93,10 @@ public class Controller {
 		String cedula = JOptionPane.showInputDialog(view, "Ingrese la cédula del funcionario a eliminar:",
 				"Eliminar funcionario", JOptionPane.QUESTION_MESSAGE);
 		if (cedula == null) {
-			return;
+			return; // el usuario canceló
 		}
-		cedula = cedula.trim();
-		if (!cedula.isEmpty()) {
-			String resultado = farmacia.eliminarUsuarioPorCedula(cedula);
-			mostrarMensaje(resultado);
-			listarFuncionarios(); // Refresca la lista después de eliminar
-		} else {
-			mostrarMensaje("Cédula no válida.");
-		}
+		mostrarMensaje(farmacia.eliminarUsuarioPorCedula(cedula));
+		listarFuncionarios();
 	}
 
 	private void agregarMedicamento() {
@@ -135,59 +109,34 @@ public class Controller {
 
 	private void guardarMedicamento(boolean actualizar) {
 		PanelInventario panel = view.getPanelInventario();
-		if (hayCamposVacios(panel.getIdField(), panel.getNombreField(), panel.getEmpresaField(),
-				panel.getPrecioField(), panel.getCantidadField())) {
-			mostrarMensaje("Todos los campos son obligatorios.");
-			return;
-		}
-		try {
-			long id = Long.parseLong(panel.getIdField().getText().trim());
-			String nombre = panel.getNombreField().getText().trim();
-			String empresa = panel.getEmpresaField().getText().trim();
-			float precio = Float.parseFloat(panel.getPrecioField().getText().trim());
-			int cantidad = Integer.parseInt(panel.getCantidadField().getText().trim());
-
-			if (precio < 0 || cantidad < 0) {
-				mostrarMensaje("El precio y la cantidad no pueden ser negativos.");
-				return;
-			}
-
-			String resultado = actualizar
-					? farmacia.actualizarMedicamento(id, nombre, empresa, precio, cantidad)
-					: farmacia.agregarMedicamento(id, nombre, empresa, precio, cantidad);
-			mostrarMensaje(resultado);
-		} catch (NumberFormatException e) {
-			mostrarMensaje("ID, precio y cantidad deben ser números válidos.");
-		}
+		mostrarMensaje(farmacia.guardarMedicamento(panel.getIdField().getText(), panel.getNombreField().getText(),
+				panel.getEmpresaField().getText(), panel.getPrecioField().getText(),
+				panel.getCantidadField().getText(), actualizar).mensaje());
 	}
 
 	private void eliminarMedicamento() {
-		String texto = view.getPanelInventario().getIdField().getText().trim();
-		if (texto.isEmpty()) {
-			mostrarMensaje("Ingrese el ID del medicamento a eliminar.");
+		String id = view.getPanelInventario().getIdField().getText();
+		Resultado validacion = farmacia.validarIdMedicamento(id);
+		if (!validacion.exito()) {
+			mostrarMensaje(validacion.mensaje());
 			return;
 		}
-		try {
-			long id = Long.parseLong(texto);
-			int opcion = JOptionPane.showConfirmDialog(view, "¿Eliminar el medicamento con ID " + id + "?",
-					"Confirmar", JOptionPane.YES_NO_OPTION);
-			if (opcion == JOptionPane.YES_OPTION) {
-				mostrarMensaje(farmacia.eliminarMedicamento(id));
-				listarMedicamentos();
-			}
-		} catch (NumberFormatException e) {
-			mostrarMensaje("El ID debe ser un número válido.");
+		int opcion = JOptionPane.showConfirmDialog(view, "¿Eliminar el medicamento con ID " + id.trim() + "?",
+				"Confirmar", JOptionPane.YES_NO_OPTION);
+		if (opcion == JOptionPane.YES_OPTION) {
+			mostrarMensaje(farmacia.eliminarMedicamento(id).mensaje());
+			listarMedicamentos();
 		}
 	}
 
 	private void buscarMedicamento() {
 		PanelMedicina panel = view.getPanelMedicina();
-		String texto = panel.getBuscarField().getText().trim();
-		if (texto.isEmpty()) {
-			mostrarMensaje("Ingrese el nombre del medicamento a buscar.");
+		Resultado busqueda = farmacia.buscarMedicamentos(panel.getBuscarField().getText());
+		if (!busqueda.exito()) {
+			mostrarMensaje(busqueda.mensaje());
 			return;
 		}
-		panel.getAreaResultados().setText(farmacia.buscarMedicamentos(texto));
+		panel.getAreaResultados().setText(busqueda.mensaje());
 		panel.getAreaResultados().setCaretPosition(0);
 	}
 
@@ -200,66 +149,33 @@ public class Controller {
 		JOptionPane.showMessageDialog(view, mensaje, "BosqueFarma", JOptionPane.INFORMATION_MESSAGE);
 	}
 
-	private boolean hayCamposVacios(JTextField... campos) {
-		for (JTextField campo : campos) {
-			if (campo.getText().isBlank()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	private void generarYMostrarTurno() {
-		String cedula = view.getPanelTurno().getCedula().trim();
-		if (cedula.isEmpty()) {
-			mostrarMensaje("Ingrese la cédula del paciente.");
+		String cedula = view.getPanelTurno().getCedula();
+		Resultado turno = farmacia.generarTurno(cedula);
+		if (!turno.exito()) {
+			mostrarMensaje(turno.mensaje());
 			return;
 		}
-		view.getPanelTurno().mostrarTurno(turnos.generarTurno(), cedula);
+		view.getPanelTurno().mostrarTurno(turno.mensaje(), cedula.trim());
 	}
 
 	private void loginUsuario() {
-		String cedula = view.getPanelLogin().getCedula().trim();
-		String password = view.getPanelLogin().getPassword();
-
-		if (cedula.isEmpty() || password.isEmpty()) {
-			mostrarMensaje("Ingrese cédula y contraseña.");
-			return;
-		}
-		if (usuarioDAO.verificarUsuario(cedula, password)) {
+		Resultado sesion = farmacia.iniciarSesion(view.getPanelLogin().getCedula(), view.getPanelLogin().getPassword());
+		if (sesion.exito()) {
 			showPanelMenu();
 		} else {
-			mostrarMensaje("Usuario o contraseña incorrectos. Intente de nuevo.");
+			mostrarMensaje(sesion.mensaje());
 		}
 	}
 
 	private void registrarUsuario() {
-		String cedula = view.getPanelRegistro().getCedula().trim();
-		String password = view.getPanelRegistro().getPassword();
-		String nombre = view.getPanelRegistro().getNombre().trim();
-		String correo = view.getPanelRegistro().getCorreo().trim();
-
-		if (cedula.isEmpty() || password.isEmpty() || nombre.isEmpty() || correo.isEmpty()) {
-			mostrarMensaje("Todos los campos son obligatorios.");
-			return;
+		PanelRegistro panel = view.getPanelRegistro();
+		Resultado registro = farmacia.registrarFuncionario(panel.getCedula(), panel.getPassword(),
+				panel.getNombre(), panel.getCorreo());
+		mostrarMensaje(registro.mensaje());
+		if (registro.exito()) {
+			showPanelInicio();
 		}
-		if ((cedula + password + nombre + correo).contains(",")) {
-			mostrarMensaje("Los datos no pueden contener comas.");
-			return;
-		}
-		if (!correo.matches("[^@\\s]+@[^@\\s]+\\.[^@\\s]+")) {
-			mostrarMensaje("Ingrese un correo válido.");
-			return;
-		}
-		if (usuarioDAO.existeCedula(cedula)) {
-			mostrarMensaje("Ya existe un funcionario registrado con esa cédula.");
-			return;
-		}
-
-		usuarioDAO.guardarUsuario(new FuncionarioDTO(cedula, password, nombre, correo));
-
-		mostrarMensaje("Usuario registrado con éxito.");
-		showPanelInicio();
 	}
 
 	private void showPanelLogin() {

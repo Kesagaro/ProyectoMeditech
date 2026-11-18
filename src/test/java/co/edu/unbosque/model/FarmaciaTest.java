@@ -44,7 +44,7 @@ class FarmaciaTest {
     void rechazaOrdenSinStockSuficiente() {
         assertEquals("Stock insuficiente: quedan 5 unidades de Ibuprofeno.",
                 farmacia.agregarOrden("1010", "EPS1", "Ibuprofeno", 6));
-        assertTrue(farmacia.buscarMedicamentos("Ibuprofeno").contains("Stock: 5"));
+        assertTrue(farmacia.buscarMedicamentos("Ibuprofeno").mensaje().contains("Stock: 5"));
         assertEquals("No hay órdenes registradas.", farmacia.listarOrdenes());
     }
 
@@ -54,7 +54,7 @@ class FarmaciaTest {
                 farmacia.agregarOrden("1010", "EPS1", "Ibuprofeno", 5));
 
         Farmacia reabierta = new Farmacia(datos);
-        assertTrue(reabierta.buscarMedicamentos("Ibuprofeno").contains("Stock: 0"));
+        assertTrue(reabierta.buscarMedicamentos("Ibuprofeno").mensaje().contains("Stock: 0"));
         assertTrue(reabierta.listarOrdenes().contains("Medicamento: Ibuprofeno, Cantidad: 5"));
     }
 
