@@ -86,7 +86,7 @@ En VS Code también aparecen en la vista **Testing** (ícono del matraz). GitHub
 ```
 src/main/java/co/edu/unbosque/
 ├── controller/          Main (punto de entrada) y Controller (eventos vista → modelo)
-├── model/               Farmacia (fachada del modelo) y Turnos
+├── model/               Farmacia (fachada y reglas de negocio), Resultado y Turnos
 │   └── persistence/     DAO y DTO de funcionarios, medicamentos y órdenes; interfaz Crud<T>
 └── view/                View (JFrame + CardLayout) y un panel por pantalla
 
@@ -121,7 +121,7 @@ Modelo editable en Astah: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/Bos
 
 - [x] **Ciclo 7: Maven y CI.** Estructura estándar de Maven, Maven Wrapper y GitHub Actions.
 - [x] **Ciclo 8: Release ejecutable.** `BosqueFarma.jar` publicado en GitHub Releases.
-- [ ] **Ciclo 9: Reglas en el modelo.** Validaciones del controlador movidas al modelo, con pruebas.
+- [x] **Ciclo 9: Reglas en el modelo.** Validaciones del controlador movidas al modelo, con pruebas.
 - [ ] **Ciclo 10: Mejoras funcionales.** Órdenes con fecha y total, turnos persistentes, sesión del funcionario.
 - [ ] **Ciclo 11: Presentación.** README en inglés y metadatos del repositorio.
 - [ ] **Ciclo 12: Base de datos.** Persistencia en SQLite con JDBC.
