@@ -5,11 +5,11 @@ package co.edu.unbosque.model;
  */
 public record Resultado(boolean exito, String mensaje) {
 
-    static Resultado ok(String mensaje) {
+    public static Resultado ok(String mensaje) {
         return new Resultado(true, mensaje);
     }
 
-    static Resultado error(String mensaje) {
+    public static Resultado error(String mensaje) {
         return new Resultado(false, mensaje);
     }
 }
