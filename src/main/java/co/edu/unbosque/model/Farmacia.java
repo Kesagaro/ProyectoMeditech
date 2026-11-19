@@ -289,7 +289,7 @@ public class Farmacia {
     }
 
     /** Valor en pesos colombianos sin decimales, por ejemplo $7.500. */
-    static String pesos(double valor) {
+    public static String pesos(double valor) {
         return "$" + NumberFormat.getIntegerInstance(Locale.forLanguageTag("es-CO")).format(Math.round(valor));
     }
 
