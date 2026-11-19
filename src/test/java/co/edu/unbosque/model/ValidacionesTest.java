@@ -118,7 +118,7 @@ class ValidacionesTest {
         farmacia.guardarMedicamento("1", "Paracetamol", "Genfar", "1500", "20", false);
         Resultado orden = farmacia.agregarOrden(" 1010 ", "EPS1", " paracetamol ", " 5 ");
         assertTrue(orden.exito());
-        assertEquals("Orden agregada. Stock restante de Paracetamol: 15.", orden.mensaje());
+        assertEquals("Orden agregada por $7.500. Stock restante de Paracetamol: 15.", orden.mensaje());
         error("Stock insuficiente: quedan 15 unidades de Paracetamol.",
                 farmacia.agregarOrden("1010", "EPS1", "Paracetamol", "16"));
     }

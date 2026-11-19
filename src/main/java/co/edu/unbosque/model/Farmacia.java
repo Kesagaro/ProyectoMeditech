@@ -8,9 +8,15 @@ import co.edu.unbosque.model.persistence.OrdenDAO;
 import co.edu.unbosque.model.persistence.OrdenDTO;
 
 import java.io.File;
+import java.text.NumberFormat;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -19,11 +25,13 @@ import java.util.Map;
  */
 public class Farmacia {
     private static final String CORREO_VALIDO = "[^@\\s]+@[^@\\s]+\\.[^@\\s]+";
+    private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private MedicamentoDAO medicamentoDAO;
     private FuncionariosDAO usuarioDAO;
     private OrdenDAO ordenDAO;
-    private Turnos turnos = new Turnos();
+    private Turnos turnos;
+    private Clock reloj;
 
     public Farmacia() {
         this(new File("data"));
@@ -31,9 +39,16 @@ public class Farmacia {
 
     /** Permite usar otra carpeta de datos, por ejemplo una temporal en las pruebas. */
     public Farmacia(File directorioDatos) {
+        this(directorioDatos, Clock.systemDefaultZone());
+    }
+
+    /** Permite además fijar la fecha y hora, para probar órdenes y turnos. */
+    public Farmacia(File directorioDatos, Clock reloj) {
+        this.reloj = reloj;
         this.medicamentoDAO = new MedicamentoDAO(directorioDatos);
         this.usuarioDAO = new FuncionariosDAO(directorioDatos.toPath());
         this.ordenDAO = new OrdenDAO(directorioDatos);
+        this.turnos = new Turnos(new File(directorioDatos, "turnos.txt"), reloj);
     }
 
     // ---------------------------------------------------------------- funcionarios
@@ -225,8 +240,10 @@ public class Farmacia {
                     + medicamento.getNombre() + ".");
         }
         medicamentoDAO.descontarStock(medicamento, cantidad);
-        ordenDAO.agregarOrden(new OrdenDTO(documento, codigoEntidad, medicamento.getNombre(), cantidad));
-        return Resultado.ok("Orden agregada. Stock restante de " + medicamento.getNombre() + ": "
+        double total = (double) medicamento.getPrecio() * cantidad;
+        LocalDateTime fecha = LocalDateTime.now(reloj).truncatedTo(ChronoUnit.MINUTES);
+        ordenDAO.agregarOrden(new OrdenDTO(documento, codigoEntidad, medicamento.getNombre(), cantidad, fecha, total));
+        return Resultado.ok("Orden agregada por " + pesos(total) + ". Stock restante de " + medicamento.getNombre() + ": "
                 + medicamento.getCantidad() + ".");
     }
     
@@ -252,12 +269,21 @@ public class Farmacia {
     public String listarOrdenes() {
         StringBuilder listado = new StringBuilder();
         for (OrdenDTO orden : ordenDAO.listarOrdenes()) {
-            listado.append("Documento: ").append(orden.getDocumentoPaciente())
-                   .append(", Entidad: ").append(orden.getCodigoEntidad())
-                   .append(", Medicamento: ").append(orden.getNombreMedicamento())
-                   .append(", Cantidad: ").append(orden.getCantidadMedicamento()).append("\n");
+            // las órdenes antiguas no tienen fecha ni total
+            listado.append(orden.getFecha() == null ? "Sin fecha" : orden.getFecha().format(FORMATO_FECHA))
+                   .append(" | Documento: ").append(orden.getDocumentoPaciente())
+                   .append(" | Entidad: ").append(orden.getCodigoEntidad())
+                   .append(" | ").append(orden.getNombreMedicamento())
+                   .append(" x ").append(orden.getCantidadMedicamento())
+                   .append(" | Total: ").append(orden.getTotal() == null ? "-" : pesos(orden.getTotal()))
+                   .append("\n");
         }
         return listado.length() == 0 ? "No hay órdenes registradas." : listado.toString();
+    }
+
+    /** Valor en pesos colombianos sin decimales, por ejemplo $7.500. */
+    static String pesos(double valor) {
+        return "$" + NumberFormat.getIntegerInstance(Locale.forLanguageTag("es-CO")).format(Math.round(valor));
     }
 
     // ---------------------------------------------------------------- utilidades

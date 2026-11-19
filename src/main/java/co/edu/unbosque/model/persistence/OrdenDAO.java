@@ -2,6 +2,8 @@ package co.edu.unbosque.model.persistence;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +39,9 @@ public class OrdenDAO {
 
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(archivo, StandardCharsets.UTF_8, true))) {
                 bw.write(orden.getDocumentoPaciente() + "," + orden.getCodigoEntidad() + ","
-                        + orden.getNombreMedicamento() + "," + orden.getCantidadMedicamento());
+                        + orden.getNombreMedicamento() + "," + orden.getCantidadMedicamento() + ","
+                        + (orden.getFecha() == null ? "" : orden.getFecha().toString()) + ","
+                        + (orden.getTotal() == null ? "" : orden.getTotal().toString()));
                 bw.newLine();
             }
         } catch (IOException e) {
@@ -57,11 +61,17 @@ public class OrdenDAO {
                 if (linea.isBlank()) continue;
                 String[] datos = linea.split(",", -1);
                 try {
-                    if (datos.length != 4) throw new IllegalArgumentException("se esperaban 4 campos");
+                    // formato actual: documento,entidad,medicamento,cantidad,fecha,total
+                    // formato antiguo (sin fecha ni total): documento,entidad,medicamento,cantidad
+                    if (datos.length != 4 && datos.length != 6) {
+                        throw new IllegalArgumentException("se esperaban 4 o 6 campos");
+                    }
                     int cantidad = Integer.parseInt(datos[3].trim());
                     if (cantidad <= 0) throw new IllegalArgumentException("cantidad no positiva");
-                    ordenes.add(new OrdenDTO(datos[0].trim(), datos[1].trim(), datos[2].trim(), cantidad));
-                } catch (IllegalArgumentException e) {
+                    LocalDateTime fecha = datos.length == 6 && !datos[4].isBlank() ? LocalDateTime.parse(datos[4].trim()) : null;
+                    Double total = datos.length == 6 && !datos[5].isBlank() ? Double.valueOf(datos[5].trim()) : null;
+                    ordenes.add(new OrdenDTO(datos[0].trim(), datos[1].trim(), datos[2].trim(), cantidad, fecha, total));
+                } catch (IllegalArgumentException | DateTimeParseException e) {
                     // una línea dañada no impide cargar las demás
                     System.err.println("Orden ignorada en la línea " + numero + " de " + archivo.getPath() + ": " + e.getMessage());
                 }
