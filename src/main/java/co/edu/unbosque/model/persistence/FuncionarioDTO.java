@@ -48,6 +48,7 @@ public class FuncionarioDTO {
 
     @Override
     public String toString() {
-        return cedula + "," + password + "," + nombre + "," + correo;
+        // sin la contraseña: este texto puede terminar en registros o en pantalla
+        return "FuncionarioDTO[cedula=" + cedula + ", nombre=" + nombre + ", correo=" + correo + "]";
     }
 }

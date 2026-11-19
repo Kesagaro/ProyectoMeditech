@@ -74,6 +74,17 @@ public class FuncionariosDAO {
         return false;
     }
 
+    /** Nombre del funcionario, o {@code null} si no existe o es una cuenta antigua sin nombre. */
+    public String buscarNombre(String cedula) {
+        for (String linea : leerLineas()) {
+            String[] datos = linea.split(",", -1);
+            if (datos[0].equals(cedula)) {
+                return datos.length > 2 && !datos[2].isBlank() ? datos[2] : null;
+            }
+        }
+        return null;
+    }
+
     public boolean existeCedula(String cedula) {
         for (String linea : leerLineas()) {
             if (linea.split(",", -1)[0].equals(cedula)) {

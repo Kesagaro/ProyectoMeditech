@@ -72,4 +72,9 @@ public class PanelLogin extends JPanel {
 	public String getPassword() {
 		return new String(passwordField.getPassword());
 	}
+
+	/** Borra la contraseña para que no quede escrita al volver a esta pantalla. */
+	public void limpiarPassword() {
+		passwordField.setText("");
+	}
 }
