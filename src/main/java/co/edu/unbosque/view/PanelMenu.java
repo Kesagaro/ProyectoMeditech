@@ -11,6 +11,7 @@ public class PanelMenu extends JPanel {
 	private PersonalButton mediButton;
 	private PersonalButton reporButton;
 	private PersonalButton atrasButton;
+	private JLabel sesionLabel;
 
 	public PanelMenu() {
 		setLayout(null);
@@ -18,6 +19,11 @@ public class PanelMenu extends JPanel {
 		glassPanel = new TransparentPanel();
 		glassPanel.setLayout(null);
 		glassPanel.setBounds(70, 50, 400, 300);
+
+		sesionLabel = new JLabel("", SwingConstants.CENTER);
+		sesionLabel.setFont(new Font("Arial", Font.BOLD, 16));
+		sesionLabel.setBounds(15, 20, 370, 30);
+		glassPanel.add(sesionLabel);
 
 		inventarioButton = new PersonalButton("Inventario");
 		inventarioButton.setBounds(15, 125, 180, 36);
@@ -55,6 +61,11 @@ public class PanelMenu extends JPanel {
 				new Color(178, 197, 178));
 		g2d.setPaint(gradient);
 		g2d.fillRect(0, 0, getWidth(), getHeight());
+	}
+
+	/** Muestra quién inició sesión; con {@code null} se borra al cerrar la sesión. */
+	public void mostrarFuncionario(String nombre) {
+		sesionLabel.setText(nombre == null ? "" : "Sesión: " + nombre);
 	}
 
 	public PersonalButton getInventarioButton() {

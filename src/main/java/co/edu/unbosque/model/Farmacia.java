@@ -53,13 +53,20 @@ public class Farmacia {
 
     // ---------------------------------------------------------------- funcionarios
 
+    /**
+     * Si las credenciales son correctas, el mensaje del resultado es el nombre del funcionario
+     * (o su cédula, en cuentas antiguas sin nombre), para mostrarlo durante la sesión.
+     */
     public Resultado iniciarSesion(String cedula, String password) {
         if (vacio(cedula) || password == null || password.isEmpty()) {
             return Resultado.error("Ingrese cédula y contraseña.");
         }
-        return usuarioDAO.verificarUsuario(cedula.trim(), password)
-                ? Resultado.ok("Bienvenido.")
-                : Resultado.error("Usuario o contraseña incorrectos. Intente de nuevo.");
+        cedula = cedula.trim();
+        if (!usuarioDAO.verificarUsuario(cedula, password)) {
+            return Resultado.error("Usuario o contraseña incorrectos. Intente de nuevo.");
+        }
+        String nombre = usuarioDAO.buscarNombre(cedula);
+        return Resultado.ok(nombre != null ? nombre : "CC " + cedula);
     }
 
     public Resultado registrarFuncionario(String cedula, String password, String nombre, String correo) {

@@ -41,7 +41,7 @@ public class Controller {
 		view.getPanelRegistro().getRegistroButton().addActionListener(e -> registrarUsuario());
 		view.getPanelMenu().getInventarioButton().addActionListener(e -> showPanelInventario());
 
-		view.getPanelMenu().getAtrasButton().addActionListener(e -> showPanelLogin());
+		view.getPanelMenu().getAtrasButton().addActionListener(e -> cerrarSesion());
 		view.getPanelMenu().getTurnoButton().addActionListener(e -> showPanelTurno());
 		view.getPanelMenu().getReporButton().addActionListener(e -> showPanelReport());
 		view.getPanelMenu().getFuncionariosButton().addActionListener(e -> showPanelFuncionarios());
@@ -162,10 +162,17 @@ public class Controller {
 	private void loginUsuario() {
 		Resultado sesion = farmacia.iniciarSesion(view.getPanelLogin().getCedula(), view.getPanelLogin().getPassword());
 		if (sesion.exito()) {
+			view.getPanelLogin().limpiarPassword();
+			view.getPanelMenu().mostrarFuncionario(sesion.mensaje());
 			showPanelMenu();
 		} else {
 			mostrarMensaje(sesion.mensaje());
 		}
+	}
+
+	private void cerrarSesion() {
+		view.getPanelMenu().mostrarFuncionario(null);
+		showPanelLogin();
 	}
 
 	private void registrarUsuario() {

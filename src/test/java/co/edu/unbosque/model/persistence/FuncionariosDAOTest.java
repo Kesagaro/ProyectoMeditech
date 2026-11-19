@@ -3,6 +3,7 @@ package co.edu.unbosque.model.persistence;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
@@ -88,6 +89,22 @@ class FuncionariosDAOTest {
         assertFalse(dao.existeCedula("1"));
         assertTrue(dao.verificarUsuario("2", "b"));
         assertFalse(Files.exists(datos.resolve("temp_usuarios.txt")));
+    }
+
+    @Test
+    void buscaElNombreDelFuncionario() throws Exception {
+        Files.writeString(datos.resolve("usuarios.txt"), "112233,112233\n");
+        dao.guardarUsuario(new FuncionarioDTO("777", "secreta", "Ana Ruiz", "ana@mail.com"));
+        assertEquals("Ana Ruiz", dao.buscarNombre("777"));
+        assertNull(dao.buscarNombre("112233"), "cuenta antigua sin nombre");
+        assertNull(dao.buscarNombre("999"));
+    }
+
+    @Test
+    void elToStringNoIncluyeLaContrasena() {
+        String texto = new FuncionarioDTO("777", "secreta", "Ana Ruiz", "ana@mail.com").toString();
+        assertFalse(texto.contains("secreta"));
+        assertTrue(texto.contains("777") && texto.contains("Ana Ruiz"));
     }
 
     @Test

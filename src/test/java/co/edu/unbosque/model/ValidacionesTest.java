@@ -153,7 +153,8 @@ class ValidacionesTest {
         error("Ingrese cédula y contraseña.", farmacia.iniciarSesion("777", ""));
         error("Ingrese cédula y contraseña.", farmacia.iniciarSesion(" ", "clave"));
         error("Usuario o contraseña incorrectos. Intente de nuevo.", farmacia.iniciarSesion("777", "mala"));
-        assertTrue(farmacia.iniciarSesion(" 777 ", "clave").exito());
+        assertEquals(new Resultado(true, "Ana Ruiz"), farmacia.iniciarSesion(" 777 ", "clave"),
+                "al iniciar sesión se obtiene el nombre del funcionario");
     }
 
     @Test
