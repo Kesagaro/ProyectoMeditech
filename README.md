@@ -16,11 +16,11 @@ La primera vez, crea tu usuario con **Registrar**. Los datos se guardan en la ca
 
 ## Funcionalidades
 
-- Registro (cédula, nombre, correo) e inicio de sesión de funcionarios
+- Registro (cédula, nombre, correo) e inicio de sesión de funcionarios; el menú muestra quién inició sesión
 - Inventario: agregar, actualizar, listar y eliminar medicamentos por ID
 - Búsqueda de medicamentos por nombre con precio y stock
-- Generación de turnos de atención asociados a la cédula del paciente
-- Órdenes de pacientes que validan el medicamento y el stock disponible, y lo descuentan del inventario
+- Turnos de atención asociados a la cédula del paciente; la numeración se conserva al cerrar la aplicación y vuelve a 1 cada día
+- Órdenes de pacientes que validan el medicamento y el stock disponible, lo descuentan del inventario y registran fecha y total en pesos
 - Listado y eliminación de funcionarios
 - Reportes: Top 5 de medicamentos más expendidos, calculado con las órdenes registradas
 
@@ -106,7 +106,8 @@ Modelo editable en Astah: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/Bos
 |---|---|---|
 | `data/usuarios.txt` | texto `cedula,hash,nombre,correo` | Funcionarios; la contraseña se guarda como hash PBKDF2 con sal |
 | `data/Medicamentos.txt` | serialización Java | Inventario |
-| `data/ordenes.txt` | texto `documento,entidad,medicamento,cantidad` | Órdenes |
+| `data/ordenes.txt` | texto `documento,entidad,medicamento,cantidad,fecha,total` | Órdenes (las antiguas, sin fecha ni total, se siguen leyendo) |
+| `data/turnos.txt` | texto `fecha,turnoSiguiente` | Turno del día |
 
 ## Roadmap
 
@@ -122,7 +123,7 @@ Modelo editable en Astah: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/Bos
 - [x] **Ciclo 7: Maven y CI.** Estructura estándar de Maven, Maven Wrapper y GitHub Actions.
 - [x] **Ciclo 8: Release ejecutable.** `BosqueFarma.jar` publicado en GitHub Releases.
 - [x] **Ciclo 9: Reglas en el modelo.** Validaciones del controlador movidas al modelo, con pruebas.
-- [ ] **Ciclo 10: Mejoras funcionales.** Órdenes con fecha y total, turnos persistentes, sesión del funcionario.
+- [x] **Ciclo 10: Mejoras funcionales.** Órdenes con fecha y total, turnos persistentes, sesión del funcionario.
 - [ ] **Ciclo 11: Presentación.** README en inglés y metadatos del repositorio.
 - [ ] **Ciclo 12: Base de datos.** Persistencia en SQLite con JDBC.
 
