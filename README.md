@@ -1,5 +1,7 @@
 # BosqueFarma
 
+**Español** | [English](README.en.md)
+
 Aplicación de escritorio en **Java Swing** para la gestión de una farmacia: funcionarios, inventario de medicamentos, turnos de atención, órdenes de pacientes y reportes.
 
 Nació como proyecto académico y se está refactorizando por ciclos (ver [Roadmap](#roadmap)) para llevarlo a un código limpio, probado y documentado.
@@ -124,7 +126,7 @@ Modelo editable en Astah: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/Bos
 - [x] **Ciclo 8: Release ejecutable.** `BosqueFarma.jar` publicado en GitHub Releases.
 - [x] **Ciclo 9: Reglas en el modelo.** Validaciones del controlador movidas al modelo, con pruebas.
 - [x] **Ciclo 10: Mejoras funcionales.** Órdenes con fecha y total, turnos persistentes, sesión del funcionario.
-- [ ] **Ciclo 11: Presentación.** README en inglés y metadatos del repositorio.
+- [x] **Ciclo 11: Presentación.** README en inglés y metadatos del repositorio.
 - [ ] **Ciclo 12: Base de datos.** Persistencia en SQLite con JDBC.
 
 ## Documentación
