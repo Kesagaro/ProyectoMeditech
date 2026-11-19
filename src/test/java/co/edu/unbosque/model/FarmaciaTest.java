@@ -7,6 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +18,9 @@ import org.junit.jupiter.api.io.TempDir;
 
 class FarmaciaTest {
 
+    /** 19/11/2026 a las 14:30:45 en Bogotá. */
+    static final Clock RELOJ = Clock.fixed(Instant.parse("2026-11-19T19:30:45Z"), ZoneId.of("America/Bogota"));
+
     @TempDir
     File datos;
 
@@ -22,7 +28,7 @@ class FarmaciaTest {
 
     @BeforeEach
     void preparar() {
-        farmacia = new Farmacia(datos);
+        farmacia = new Farmacia(datos, RELOJ);
         farmacia.agregarMedicamento(1, "Paracetamol", "Genfar", 1500, 20);
         farmacia.agregarMedicamento(2, "Ibuprofeno", "MK", 2000, 5);
     }
@@ -50,19 +56,35 @@ class FarmaciaTest {
 
     @Test
     void ordenValidaDescuentaStockYSePersiste() {
-        assertEquals("Orden agregada. Stock restante de Ibuprofeno: 0.",
+        assertEquals("Orden agregada por $10.000. Stock restante de Ibuprofeno: 0.",
                 farmacia.agregarOrden("1010", "EPS1", "Ibuprofeno", 5));
 
-        Farmacia reabierta = new Farmacia(datos);
+        Farmacia reabierta = new Farmacia(datos, RELOJ);
         assertTrue(reabierta.buscarMedicamentos("Ibuprofeno").mensaje().contains("Stock: 0"));
-        assertTrue(reabierta.listarOrdenes().contains("Medicamento: Ibuprofeno, Cantidad: 5"));
+        assertEquals("19/11/2026 14:30 | Documento: 1010 | Entidad: EPS1 | Ibuprofeno x 5 | Total: $10.000\n",
+                reabierta.listarOrdenes());
     }
 
     @Test
-    void elNombreDelMedicamentoNoDistingueMayusculas() throws Exception {
+    void laOrdenGuardaFechaYTotal() throws Exception {
         farmacia.agregarOrden("1010", "EPS1", "PARACETAMOL", 2);
         List<String> lineas = Files.readAllLines(Path.of(datos.getPath(), "ordenes.txt"));
-        assertEquals(List.of("1010,EPS1,Paracetamol,2"), lineas);
+        assertEquals(List.of("1010,EPS1,Paracetamol,2,2026-11-19T14:30,3000.0"), lineas,
+                "nombre normalizado, fecha sin segundos y total = precio x cantidad");
+    }
+
+    @Test
+    void lasOrdenesAntiguasSeListanSinFechaNiTotal() throws Exception {
+        Files.writeString(Path.of(datos.getPath(), "ordenes.txt"), "1010,EPS1,Paracetamol,3\n");
+        assertEquals("Sin fecha | Documento: 1010 | Entidad: EPS1 | Paracetamol x 3 | Total: -\n",
+                new Farmacia(datos, RELOJ).listarOrdenes());
+    }
+
+    @Test
+    void formatoDePesos() {
+        assertEquals("$0", Farmacia.pesos(0));
+        assertEquals("$1.500", Farmacia.pesos(1500));
+        assertEquals("$1.234.568", Farmacia.pesos(1234567.6));
     }
 
     @Test
