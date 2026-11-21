@@ -45,6 +45,11 @@ public class MedicamentoDAO implements Crud<MedicamentoDTO> {
         return actualizarPorId(medicamentos.get(index).getNumId(), newData);
     }
 
+    /** Todo el inventario, ordenado por ID. */
+    public List<MedicamentoDTO> listar() {
+        return consultar(COLUMNAS + "ORDER BY id");
+    }
+
     public boolean existeId(long id) {
         return !consultar(COLUMNAS + "WHERE id = ?", id).isEmpty();
     }

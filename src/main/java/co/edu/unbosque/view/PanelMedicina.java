@@ -1,62 +1,49 @@
 package co.edu.unbosque.view;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Graphics;
+
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 public class PanelMedicina extends JPanel {
-	private TransparentPanel glassPanel;
 	private JTextField buscarField;
 	private PersonalButton buscarButton;
 	private PersonalButton atrasButton;
-	private JTextArea areaResultados;
+	private Tabla tabla;
 
 	public PanelMedicina() {
-		setLayout(null);
-
-		glassPanel = new TransparentPanel();
-		glassPanel.setLayout(null);
-		glassPanel.setBounds(25, 50, 485, 390);
-
-		JLabel tituloLabel = new JLabel("Buscar medicamento", SwingConstants.CENTER);
-		tituloLabel.setFont(new Font("Arial", Font.BOLD, 20));
-		tituloLabel.setBounds(15, 15, 455, 30);
-		glassPanel.add(tituloLabel);
-
-		JLabel nombreLabel = new JLabel("Nombre:");
-		nombreLabel.setBounds(15, 60, 70, 30);
-		glassPanel.add(nombreLabel);
+		super(new BorderLayout());
+		atrasButton = new PersonalButton("Atrás", false);
+		add(Tema.encabezado(atrasButton, "Buscar medicamento", null), BorderLayout.NORTH);
 
 		buscarField = new JTextField();
-		buscarField.setBounds(85, 60, 250, 30);
-		glassPanel.add(buscarField);
-
+		buscarField.putClientProperty("JTextField.placeholderText", "Nombre o parte del nombre");
+		buscarField.putClientProperty("JTextField.showClearButton", true);
 		buscarButton = new PersonalButton("Buscar");
-		buscarButton.setFont(new Font("Garlic", Font.BOLD, 14));
-		buscarButton.setBounds(350, 59, 120, 32);
-		glassPanel.add(buscarButton);
+		JPanel barra = new JPanel(new BorderLayout(10, 0));
+		barra.setOpaque(false);
+		barra.setBorder(BorderFactory.createEmptyBorder(0, 0, 14, 0));
+		barra.add(buscarField, BorderLayout.CENTER);
+		barra.add(buscarButton, BorderLayout.EAST);
 
-		areaResultados = new JTextArea();
-		areaResultados.setEditable(false);
-		JScrollPane scrollPane = new JScrollPane(areaResultados);
-		scrollPane.setBounds(15, 105, 455, 270);
-		glassPanel.add(scrollPane);
+		tabla = new Tabla(new String[] {"ID", "Nombre", "Empresa", "Precio", "Stock"},
+				new Class<?>[] {Long.class, String.class, String.class, Double.class, Integer.class});
+		tabla.setMensajeVacio("Escriba un nombre y pulse Buscar.");
+		tabla.anchos(60, 260, 180, 100, 80);
 
-		atrasButton = new PersonalButton("Atrás");
-		atrasButton.setBounds(5, 5, 100, 40);
-		add(atrasButton);
-
-		add(glassPanel);
+		TransparentPanel tarjeta = new TransparentPanel();
+		tarjeta.setLayout(new BorderLayout());
+		tarjeta.add(barra, BorderLayout.NORTH);
+		tarjeta.add(tabla, BorderLayout.CENTER);
+		add(Tema.contenido(tarjeta), BorderLayout.CENTER);
 	}
 
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		Graphics2D g2d = (Graphics2D) g;
-
-		GradientPaint gradient = new GradientPaint(0, 0, new Color(107, 142, 78), 0, getHeight(),
-				new Color(178, 197, 178));
-		g2d.setPaint(gradient);
-		g2d.fillRect(0, 0, getWidth(), getHeight());
+		Tema.pintarFondo(g, this);
 	}
 
 	public JTextField getBuscarField() {
@@ -71,7 +58,7 @@ public class PanelMedicina extends JPanel {
 		return atrasButton;
 	}
 
-	public JTextArea getAreaResultados() {
-		return areaResultados;
+	public Tabla getTabla() {
+		return tabla;
 	}
 }

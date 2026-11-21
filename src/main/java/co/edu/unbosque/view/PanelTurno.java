@@ -1,65 +1,66 @@
 package co.edu.unbosque.view;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 public class PanelTurno extends JPanel {
 	private JTextField cedulaField;
 	private PersonalButton turnoButton;
 	private PersonalButton atrasButton;
-	private TransparentPanel glassPanel;
-	private JLabel cedulaLabel;
 	private JLabel turnoLabel;
 	private JLabel pacienteLabel;
 
 	public PanelTurno() {
-		setLayout(null);
+		super(new BorderLayout());
+		atrasButton = new PersonalButton("Atrás", false);
+		add(Tema.encabezado(atrasButton, "Turnos de atención", null), BorderLayout.NORTH);
 
-		glassPanel = new TransparentPanel();
-        glassPanel.setLayout(null); 
-        glassPanel.setBounds(100, 50, 300, 300);
-       
-        
-        //etiqueta y campo cedula
-        cedulaLabel = new JLabel("Cédula:");
-        cedulaLabel.setBounds(50, 20, 80, 25); 
-        glassPanel.add(cedulaLabel);
-        cedulaField = new JTextField(15);
-        cedulaField.setBounds(140, 20, 120, 25); 
-        glassPanel.add(cedulaField);
-        
+		TransparentPanel tarjeta = new TransparentPanel();
+		tarjeta.setLayout(new GridBagLayout());
+		cedulaField = new JTextField(16);
+		cedulaField.putClientProperty("JTextField.placeholderText", "Cédula del paciente");
+		Tema.filaFormulario(tarjeta, 0, "Cédula", cedulaField);
 
-        turnoButton = new PersonalButton("Turno");
-        turnoButton.setBounds(75, 140, 150, 40); 
-        glassPanel.add(turnoButton);
+		turnoButton = new PersonalButton("Generar turno");
+		cedulaField.addActionListener(e -> turnoButton.doClick());
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridy = 1;
+		c.insets = new Insets(14, 0, 18, 0);
+		tarjeta.add(turnoButton, c);
 
-        atrasButton = new PersonalButton("Atrás");
-        atrasButton.setBounds(75, 200, 150, 40); 
-        glassPanel.add(atrasButton);
-        
-        turnoLabel = new JLabel("", SwingConstants.CENTER);
-        turnoLabel.setBounds(20, 60, 260, 36);
-        turnoLabel.setFont(new Font("Arial", Font.BOLD, 30));
-        turnoLabel.setForeground(Color.BLACK);
-        glassPanel.add(turnoLabel);
+		// número grande del último turno generado, en el morado del logo
+		turnoLabel = new JLabel(" ", SwingConstants.CENTER);
+		turnoLabel.setFont(Tema.fuente(Font.BOLD, 34));
+		turnoLabel.setForeground(Tema.ACENTO);
+		c.gridy = 2;
+		c.insets = new Insets(0, 0, 0, 0);
+		tarjeta.add(turnoLabel, c);
 
-        pacienteLabel = new JLabel("", SwingConstants.CENTER);
-        pacienteLabel.setBounds(20, 98, 260, 24);
-        pacienteLabel.setFont(new Font("Arial", Font.PLAIN, 16));
-        glassPanel.add(pacienteLabel);
+		pacienteLabel = Tema.subtitulo(" ");
+		pacienteLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		c.gridy = 3;
+		tarjeta.add(pacienteLabel, c);
 
-        add(glassPanel);
-    }
-	 @Override
-	    protected void paintComponent(Graphics g) {
-	        super.paintComponent(g);
-	        Graphics2D g2d = (Graphics2D) g;
+		add(Tema.centrado(tarjeta, 400), BorderLayout.CENTER);
+	}
 
-	        GradientPaint gradient = new GradientPaint(0, 0, new Color(107, 142, 78), 0, getHeight(), new Color(178, 197, 178));
-	        g2d.setPaint(gradient);
-	        g2d.fillRect(0, 0, getWidth(), getHeight());
-	    }
-	
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		Tema.pintarFondo(g, this);
+	}
 
 	public PersonalButton getTurnoButton() {
 		return turnoButton;
@@ -72,11 +73,10 @@ public class PanelTurno extends JPanel {
 	public String getCedula() {
 		return cedulaField.getText();
 	}
-	
+
 	public void mostrarTurno(String turno, String cedula) {
 		turnoLabel.setText(turno);
 		pacienteLabel.setText("Paciente CC " + cedula);
 		cedulaField.setText("");
 	}
-
 }

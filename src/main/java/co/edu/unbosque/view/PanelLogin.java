@@ -1,61 +1,53 @@
 package co.edu.unbosque.view;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 
 public class PanelLogin extends JPanel {
 	private JTextField cedulaField;
 	private JPasswordField passwordField;
 	private PersonalButton loginButton;
 	private PersonalButton atrasButton;
-	private TransparentPanel glassPanel;
-	private JLabel cedulaLabel;
 
 	public PanelLogin() {
-		setLayout(null);
+		super(new BorderLayout());
+		atrasButton = new PersonalButton("Atrás", false);
+		add(Tema.encabezado(atrasButton, "Iniciar sesión", null), BorderLayout.NORTH);
 
-		glassPanel = new TransparentPanel();
-        glassPanel.setLayout(null); 
-        glassPanel.setBounds(100, 50, 300, 300);
-       
-        
-        //etiqueta y campo cedula
-        cedulaLabel = new JLabel("Cédula:");
-        cedulaLabel.setBounds(50, 20, 80, 25); 
-        glassPanel.add(cedulaLabel);
-        cedulaField = new JTextField(15);
-        cedulaField.setBounds(140, 20, 120, 25); 
-        glassPanel.add(cedulaField);
-        
-        //etiqueta y campo contraseña
-        JLabel passwordLabel = new JLabel("Contraseña:");
-        passwordLabel.setBounds(50, 60, 80, 25); 
-        glassPanel.add(passwordLabel);
-        passwordField = new JPasswordField(15);
-        passwordField.setBounds(140, 60, 120, 25); 
-        glassPanel.add(passwordField);
-        
+		TransparentPanel tarjeta = new TransparentPanel();
+		tarjeta.setLayout(new GridBagLayout());
+		cedulaField = new JTextField(16);
+		cedulaField.putClientProperty("JTextField.placeholderText", "Número de cédula");
+		passwordField = new JPasswordField(16);
+		passwordField.putClientProperty("JComponent.showRevealButton", true);
+		Tema.filaFormulario(tarjeta, 0, "Cédula", cedulaField);
+		Tema.filaFormulario(tarjeta, 1, "Contraseña", passwordField);
 
-        loginButton = new PersonalButton("Ingresar");
-        loginButton.setBounds(75, 120, 150, 40); 
-        glassPanel.add(loginButton);
+		loginButton = new PersonalButton("Ingresar");
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridy = 2;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(16, 0, 0, 0);
+		tarjeta.add(loginButton, c);
+		// Enter en la contraseña equivale a pulsar "Ingresar"
+		passwordField.addActionListener(e -> loginButton.doClick());
 
-        atrasButton = new PersonalButton("Atrás");
-        atrasButton.setBounds(75, 180, 150, 40); 
-        glassPanel.add(atrasButton);
+		add(Tema.centrado(tarjeta, 380), BorderLayout.CENTER);
+	}
 
-        add(glassPanel);
-    }
-	 @Override
-	    protected void paintComponent(Graphics g) {
-	        super.paintComponent(g);
-	        Graphics2D g2d = (Graphics2D) g;
-
-	        GradientPaint gradient = new GradientPaint(0, 0, new Color(107, 142, 78), 0, getHeight(), new Color(178, 197, 178));
-	        g2d.setPaint(gradient);
-	        g2d.fillRect(0, 0, getWidth(), getHeight());
-	    }
-	
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		Tema.pintarFondo(g, this);
+	}
 
 	public PersonalButton getLoginButton() {
 		return loginButton;

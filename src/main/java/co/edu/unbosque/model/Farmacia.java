@@ -13,7 +13,6 @@ import java.io.File;
 import java.text.NumberFormat;
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -27,7 +26,6 @@ import java.util.Map;
  */
 public class Farmacia {
     private static final String CORREO_VALIDO = "[^@\\s]+@[^@\\s]+\\.[^@\\s]+";
-    private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private MedicamentoDAO medicamentoDAO;
     private FuncionariosDAO usuarioDAO;
@@ -156,27 +154,36 @@ public class Farmacia {
         return "Medicamento agregado con éxito.";
     }
 
-    public String listarMedicamentos() {
-        String listado = medicamentoDAO.mostrar();
-        return listado.isEmpty() ? "No hay medicamentos registrados." : listado;
+    /** Inventario completo, una fila por medicamento: ID, nombre, empresa, precio y stock. */
+    public List<Object[]> filasMedicamentos() {
+        return filas(medicamentoDAO.listar());
     }
 
+    /**
+     * Medicamentos cuyo nombre contiene el texto buscado, con las mismas columnas que
+     * {@link #filasMedicamentos()}. Si el texto está vacío o nada coincide, el resultado es un
+     * error con el mensaje para el usuario.
+     */
     public Resultado buscarMedicamentos(String texto) {
         if (vacio(texto)) {
             return Resultado.error("Ingrese el nombre del medicamento a buscar.");
         }
-        texto = texto.trim();
-        StringBuilder resultado = new StringBuilder();
-        for (MedicamentoDTO m : medicamentoDAO.buscarPorNombre(texto)) {
-            resultado.append("ID ").append(m.getNumId())
-                    .append(" | ").append(m.getNombre())
-                    .append(" | ").append(m.getEmpresa())
-                    .append(" | Precio: ").append(m.getPrecio())
-                    .append(" | Stock: ").append(m.getCantidad()).append("\n");
+        int encontrados = medicamentoDAO.buscarPorNombre(texto.trim()).size();
+        return encontrados == 0
+                ? Resultado.error("No se encontraron medicamentos con \"" + texto.trim() + "\".")
+                : Resultado.ok(encontrados + (encontrados == 1 ? " medicamento encontrado." : " medicamentos encontrados."));
+    }
+
+    public List<Object[]> filasBusqueda(String texto) {
+        return vacio(texto) ? List.of() : filas(medicamentoDAO.buscarPorNombre(texto.trim()));
+    }
+
+    private static List<Object[]> filas(List<MedicamentoDTO> medicamentos) {
+        List<Object[]> filas = new ArrayList<>();
+        for (MedicamentoDTO m : medicamentos) {
+            filas.add(new Object[] {m.getNumId(), m.getNombre(), m.getEmpresa(), (double) m.getPrecio(), m.getCantidad()});
         }
-        return Resultado.ok(resultado.length() == 0
-                ? "No se encontraron medicamentos con \"" + texto + "\"."
-                : resultado.toString());
+        return filas;
     }
 
     public String eliminarMedicamento(long id) {
@@ -188,8 +195,13 @@ public class Farmacia {
         return medicamentoDAO.actualizarPorId(id, medicamentoActualizado);
     }
     
-    public String listarUsuarios() {
-        return usuarioDAO.mostrarUsuarios();
+    /** Funcionarios registrados: cédula, nombre y correo (nunca la contraseña). */
+    public List<Object[]> filasFuncionarios() {
+        List<Object[]> filas = new ArrayList<>();
+        for (FuncionarioDTO f : usuarioDAO.listar()) {
+            filas.add(new Object[] {f.getCedula(), f.getNombre(), f.getCorreo()});
+        }
+        return filas;
     }
     
     public String eliminarUsuarioPorCedula(String cedula) {
@@ -253,38 +265,36 @@ public class Farmacia {
                 + (medicamento.getCantidad() - cantidad) + ".");
     }
     
-    public String top5Medicamentos() {
+    /**
+     * Los 5 medicamentos con más unidades vendidas, de mayor a menor: puesto, nombre y unidades.
+     * Con empate, queda primero el que se vendió antes.
+     */
+    public List<Object[]> filasTop5() {
         Map<String, Integer> totales = new LinkedHashMap<>();
         for (OrdenDTO orden : ordenDAO.listarOrdenes()) {
             totales.merge(orden.getNombreMedicamento(), orden.getCantidadMedicamento(), Integer::sum);
         }
-        if (totales.isEmpty()) {
-            return "Aún no hay órdenes registradas.";
-        }
         List<Map.Entry<String, Integer>> ranking = new ArrayList<>(totales.entrySet());
         ranking.sort(Map.Entry.<String, Integer>comparingByValue().reversed());
 
-        StringBuilder reporte = new StringBuilder("Top 5 medicamentos más expendidos:\n\n");
+        List<Object[]> filas = new ArrayList<>();
         for (int i = 0; i < Math.min(5, ranking.size()); i++) {
-            reporte.append(i + 1).append(". ").append(ranking.get(i).getKey())
-                    .append(" - Cantidad expendida: ").append(ranking.get(i).getValue()).append("\n");
+            filas.add(new Object[] {i + 1, ranking.get(i).getKey(), ranking.get(i).getValue()});
         }
-        return reporte.toString();
+        return filas;
     }
 
-    public String listarOrdenes() {
-        StringBuilder listado = new StringBuilder();
-        for (OrdenDTO orden : ordenDAO.listarOrdenes()) {
-            // las órdenes antiguas no tienen fecha ni total
-            listado.append(orden.getFecha() == null ? "Sin fecha" : orden.getFecha().format(FORMATO_FECHA))
-                   .append(" | Documento: ").append(orden.getDocumentoPaciente())
-                   .append(" | Entidad: ").append(orden.getCodigoEntidad())
-                   .append(" | ").append(orden.getNombreMedicamento())
-                   .append(" x ").append(orden.getCantidadMedicamento())
-                   .append(" | Total: ").append(orden.getTotal() == null ? "-" : pesos(orden.getTotal()))
-                   .append("\n");
+    /**
+     * Órdenes en el orden en que se registraron: fecha, documento, entidad, medicamento, cantidad
+     * y total. Las órdenes de versiones antiguas no tienen fecha ni total ({@code null}).
+     */
+    public List<Object[]> filasOrdenes() {
+        List<Object[]> filas = new ArrayList<>();
+        for (OrdenDTO o : ordenDAO.listarOrdenes()) {
+            filas.add(new Object[] {o.getFecha(), o.getDocumentoPaciente(), o.getCodigoEntidad(),
+                    o.getNombreMedicamento(), o.getCantidadMedicamento(), o.getTotal()});
         }
-        return listado.length() == 0 ? "No hay órdenes registradas." : listado.toString();
+        return filas;
     }
 
     /** Valor en pesos colombianos sin decimales, por ejemplo $7.500. */

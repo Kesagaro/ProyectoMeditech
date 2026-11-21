@@ -29,7 +29,6 @@ public class Controller {
 		view.getPanelInventario().getAgregarButton().addActionListener(e -> agregarMedicamento());
 		view.getPanelInventario().getActualizarButton().addActionListener(e -> actualizarMedicamento());
 		view.getPanelInventario().getEliminarButton().addActionListener(e -> eliminarMedicamento());
-		view.getPanelInventario().getListarButton().addActionListener(e -> listarMedicamentos());
 		view.getPanelInventario().getAtrasButton().addActionListener(e -> showPanelMenu());
 
 		view.getPanelInicio().getLoginButton().addActionListener(e -> showPanelLogin());
@@ -62,41 +61,45 @@ public class Controller {
 
 		view.getPanelOrdenes().getAtrasButton().addActionListener(e -> showPanelReport());
 		view.getPanelOrdenes().getAgregarOrdenButton().addActionListener(e -> agregarOrden());
-	    view.getPanelOrdenes().getVerOrdenesButton().addActionListener(e -> verOrdenes());
 
 		view.getPanelFuncionarios().getAtrasButton().addActionListener(e -> showPanelMenu());
-		view.getPanelFuncionarios().getListarButton().addActionListener(e -> listarFuncionarios());
 		view.getPanelFuncionarios().getEliminarButton().addActionListener(e -> eliminarFuncionario());
 
 	}
 	
 	private void agregarOrden() {
 		PanelOrdenes panel = view.getPanelOrdenes();
-		mostrarMensaje(farmacia.agregarOrden(panel.getDocumentoField().getText(),
+		Resultado orden = farmacia.agregarOrden(panel.getDocumentoField().getText(),
 				panel.getCodigoEntidadField().getText(), panel.getNombreMedicamentoField().getText(),
-				panel.getCantidadField().getText()).mensaje());
+				panel.getCantidadField().getText());
+		mostrarMensaje(orden.mensaje());
+		if (orden.exito()) {
+			panel.getNombreMedicamentoField().setText("");
+			panel.getCantidadField().setText("");
+			verOrdenes();
+		}
 	}
-	
+
 	private void verOrdenes() {
-	    String ordenes = farmacia.listarOrdenes();
-	    view.getPanelOrdenes().getAreaOrdenes().setText(ordenes);
-	    view.getPanelOrdenes().getAreaOrdenes().setCaretPosition(0);
+		view.getPanelOrdenes().getTabla().mostrar(farmacia.filasOrdenes());
 	}
 
 	private void listarFuncionarios() {
-		String usuarios = farmacia.listarUsuarios();
-		view.getPanelFuncionarios().getAreaFuncionarios().setText(usuarios);
-		view.getPanelFuncionarios().getAreaFuncionarios().setCaretPosition(0);
+		view.getPanelFuncionarios().getTabla().mostrar(farmacia.filasFuncionarios());
 	}
 
 	private void eliminarFuncionario() {
-		String cedula = JOptionPane.showInputDialog(view, "Ingrese la cédula del funcionario a eliminar:",
-				"Eliminar funcionario", JOptionPane.QUESTION_MESSAGE);
+		String cedula = view.getPanelFuncionarios().getCedulaSeleccionada();
 		if (cedula == null) {
-			return; // el usuario canceló
+			mostrarMensaje("Seleccione en la tabla el funcionario que desea eliminar.");
+			return;
 		}
-		mostrarMensaje(farmacia.eliminarUsuarioPorCedula(cedula));
-		listarFuncionarios();
+		int opcion = JOptionPane.showConfirmDialog(view, "¿Eliminar al funcionario con cédula " + cedula + "?",
+				"Confirmar", JOptionPane.YES_NO_OPTION);
+		if (opcion == JOptionPane.YES_OPTION) {
+			mostrarMensaje(farmacia.eliminarUsuarioPorCedula(cedula));
+			listarFuncionarios();
+		}
 	}
 
 	private void agregarMedicamento() {
@@ -109,9 +112,14 @@ public class Controller {
 
 	private void guardarMedicamento(boolean actualizar) {
 		PanelInventario panel = view.getPanelInventario();
-		mostrarMensaje(farmacia.guardarMedicamento(panel.getIdField().getText(), panel.getNombreField().getText(),
+		Resultado guardado = farmacia.guardarMedicamento(panel.getIdField().getText(), panel.getNombreField().getText(),
 				panel.getEmpresaField().getText(), panel.getPrecioField().getText(),
-				panel.getCantidadField().getText(), actualizar).mensaje());
+				panel.getCantidadField().getText(), actualizar);
+		mostrarMensaje(guardado.mensaje());
+		if (guardado.exito()) {
+			listarMedicamentos();
+			panel.limpiar();
+		}
 	}
 
 	private void eliminarMedicamento() {
@@ -126,23 +134,22 @@ public class Controller {
 		if (opcion == JOptionPane.YES_OPTION) {
 			mostrarMensaje(farmacia.eliminarMedicamento(id).mensaje());
 			listarMedicamentos();
+			view.getPanelInventario().limpiar();
 		}
 	}
 
 	private void buscarMedicamento() {
 		PanelMedicina panel = view.getPanelMedicina();
-		Resultado busqueda = farmacia.buscarMedicamentos(panel.getBuscarField().getText());
+		String texto = panel.getBuscarField().getText();
+		Resultado busqueda = farmacia.buscarMedicamentos(texto);
+		panel.getTabla().mostrar(farmacia.filasBusqueda(texto));
 		if (!busqueda.exito()) {
 			mostrarMensaje(busqueda.mensaje());
-			return;
 		}
-		panel.getAreaResultados().setText(busqueda.mensaje());
-		panel.getAreaResultados().setCaretPosition(0);
 	}
 
 	private void listarMedicamentos() {
-		view.getPanelInventario().getAreaMedicamentos().setText(farmacia.listarMedicamentos());
-		view.getPanelInventario().getAreaMedicamentos().setCaretPosition(0);
+		view.getPanelInventario().getTabla().mostrar(farmacia.filasMedicamentos());
 	}
 
 	private void mostrarMensaje(String mensaje) {
@@ -206,6 +213,7 @@ public class Controller {
 	}
 
 	private void showPanelInventario() {
+		listarMedicamentos();
 		view.showPanelInventario();
 	}
 
@@ -214,15 +222,17 @@ public class Controller {
 	}
 
 	private void showPanelTop5() {
-		view.getPanelTop5().mostrarReporte(farmacia.top5Medicamentos());
+		view.getPanelTop5().mostrarReporte(farmacia.filasTop5());
 		view.showPanelTop5();
 	}
 
 	private void showPanelOrdenes() {
+		verOrdenes();
 		view.showPanelOrdenes();
 	}
 
 	private void showPanelFuncionarios() {
+		listarFuncionarios();
 		view.showPanelFuncionarios();
 	}
 

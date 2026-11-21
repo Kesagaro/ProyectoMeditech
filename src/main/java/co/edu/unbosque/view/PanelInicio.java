@@ -1,59 +1,59 @@
 package co.edu.unbosque.view;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 public class PanelInicio extends JPanel {
-	   private PersonalButton loginButton;
-	    private PersonalButton registerButton;
-	   
-	    public PanelInicio() {
-    setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10)); // Usar FlowLayout para centrar
+    private PersonalButton loginButton;
+    private PersonalButton registerButton;
 
-    // Crear panel vidrio
-    TransparentPanel glassPanel = new TransparentPanel();
-    glassPanel.setLayout(new BoxLayout(glassPanel, BoxLayout.Y_AXIS));
-    glassPanel.setPreferredSize(new Dimension(300, 300)); // Tamaño 
+    public PanelInicio() {
+        super(new GridBagLayout());
 
-    // Agregar un espaciador en la parte superior
-    glassPanel.add(Box.createRigidArea(new Dimension(0, 20))); // Espacio de 20 píxeles
+        TransparentPanel tarjeta = new TransparentPanel();
+        tarjeta.setLayout(new BoxLayout(tarjeta, BoxLayout.Y_AXIS));
 
-    // Logo cargado desde el classpath para no depender de la carpeta de ejecución
-    java.net.URL logo = getClass().getResource("/BosqueFarma.png");
-    if (logo != null) {
-        Image img = new ImageIcon(logo).getImage().getScaledInstance(200, 100, Image.SCALE_SMOOTH);
-        JLabel imageLabel = new JLabel(new ImageIcon(img), SwingConstants.CENTER);
-        imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        glassPanel.add(imageLabel);
+        // Logo cargado desde el classpath para no depender de la carpeta de ejecución
+        java.net.URL logo = getClass().getResource("/BosqueFarma.png");
+        if (logo != null) {
+            Image img = new ImageIcon(logo).getImage().getScaledInstance(280, 140, Image.SCALE_SMOOTH);
+            centrar(tarjeta.add(new JLabel(new ImageIcon(img))));
+        }
+        tarjeta.add(Box.createVerticalStrut(18));
+        centrar(tarjeta.add(Tema.titulo("Bienvenido")));
+        tarjeta.add(Box.createVerticalStrut(4));
+        centrar(tarjeta.add(Tema.subtitulo("Gestión de inventario, órdenes y turnos")));
+        tarjeta.add(Box.createVerticalStrut(24));
+
+        loginButton = new PersonalButton("Iniciar sesión");
+        registerButton = new PersonalButton("Registrar funcionario", false);
+        for (PersonalButton boton : new PersonalButton[] {loginButton, registerButton}) {
+            boton.setMaximumSize(new Dimension(280, 42));
+            boton.setPreferredSize(new Dimension(280, 42));
+            centrar(tarjeta.add(boton));
+            tarjeta.add(Box.createVerticalStrut(10));
+        }
+
+        add(tarjeta);
     }
 
-    // Crear botones con estilos
-    loginButton = new PersonalButton("Iniciar");
-    registerButton = new PersonalButton("Registrar");
-   
+    private static void centrar(Component componente) {
+        ((javax.swing.JComponent) componente).setAlignmentX(Component.CENTER_ALIGNMENT);
+    }
 
-    // Agregar botones al panel de vidrio
-    glassPanel.add(Box.createRigidArea(new Dimension(0, 15))); 
-    loginButton.setAlignmentX(Component.CENTER_ALIGNMENT); 
-    glassPanel.add(loginButton);
-    glassPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-    registerButton.setAlignmentX(Component.CENTER_ALIGNMENT); 
-    glassPanel.add(registerButton);
-    glassPanel.add(Box.createRigidArea(new Dimension(0, 15))); 
-    
-
-    add(glassPanel);
-}
-
-@Override
-protected void paintComponent(Graphics g) {
-    super.paintComponent(g);
-    Graphics2D g2d = (Graphics2D) g;
-
-    // Crear el degradado
-    GradientPaint gradient = new GradientPaint(0, 0, new Color(107, 142, 78), 0, getHeight(), new Color(178,197,178));
-    g2d.setPaint(gradient);
-    g2d.fillRect(0, 0, getWidth(), getHeight());
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Tema.pintarFondo(g, this);
     }
 
     public PersonalButton getLoginButton() {
@@ -63,8 +63,4 @@ protected void paintComponent(Graphics g) {
     public PersonalButton getRegisterButton() {
         return registerButton;
     }
-    
-    
-
-   
 }

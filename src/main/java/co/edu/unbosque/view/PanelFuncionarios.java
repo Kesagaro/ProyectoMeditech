@@ -1,80 +1,59 @@
 package co.edu.unbosque.view;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GradientPaint;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import javax.swing.JLabel;
+
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.SwingConstants;
 
-public class PanelFuncionarios extends JPanel{
-	private TransparentPanel glassPanel;
-	private JTextArea areaFuncionarios;
-    private PersonalButton eliminarButton;
-    private PersonalButton atrasButton;
-    private PersonalButton listarButton;
-	
+public class PanelFuncionarios extends JPanel {
+	private Tabla tabla;
+	private PersonalButton eliminarButton;
+	private PersonalButton atrasButton;
+
 	public PanelFuncionarios() {
-		setLayout(null);
-		
-		glassPanel = new TransparentPanel();
-		glassPanel.setLayout(null);
-		glassPanel.setBounds(25, 50, 485, 390);
+		super(new BorderLayout());
+		atrasButton = new PersonalButton("Atrás", false);
+		add(Tema.encabezado(atrasButton, "Funcionarios", null), BorderLayout.NORTH);
 
-		JLabel tituloLabel = new JLabel("Funcionarios", SwingConstants.CENTER);
-		tituloLabel.setFont(new Font("Arial", Font.BOLD, 20));
-		tituloLabel.setBounds(15, 15, 455, 30);
-		glassPanel.add(tituloLabel);
+		tabla = new Tabla(new String[] {"Cédula", "Nombre", "Correo"},
+				new Class<?>[] {String.class, String.class, String.class});
+		tabla.setMensajeVacio("No hay funcionarios registrados.");
 
-		areaFuncionarios = new JTextArea();
-		areaFuncionarios.setEditable(false);
-		areaFuncionarios.setLineWrap(true);
-		areaFuncionarios.setWrapStyleWord(true);
-		JScrollPane scrollPane = new JScrollPane(areaFuncionarios);
-		scrollPane.setBounds(15, 60, 455, 255);
-		glassPanel.add(scrollPane);
+		eliminarButton = new PersonalButton("Eliminar seleccionado", false);
+		JPanel acciones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+		acciones.setOpaque(false);
+		acciones.setBorder(BorderFactory.createEmptyBorder(14, 0, 0, 0));
+		acciones.add(eliminarButton);
 
-		listarButton = new PersonalButton("Listar");
-		listarButton.setBounds(15, 335, 220, 40);
-		glassPanel.add(listarButton);
-
-		eliminarButton = new PersonalButton("Eliminar");
-		eliminarButton.setBounds(250, 335, 220, 40);
-		glassPanel.add(eliminarButton);
-
-		atrasButton = new PersonalButton("Atrás");
-		atrasButton.setBounds(5, 5, 100, 40);
-		add(atrasButton);
-
-		add(glassPanel);
+		TransparentPanel tarjeta = new TransparentPanel();
+		tarjeta.setLayout(new BorderLayout());
+		tarjeta.add(tabla, BorderLayout.CENTER);
+		tarjeta.add(acciones, BorderLayout.SOUTH);
+		add(Tema.contenido(tarjeta), BorderLayout.CENTER);
 	}
+
+	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		Graphics2D g2d = (Graphics2D) g;
-
-		GradientPaint gradient = new GradientPaint(0, 0, new Color(107, 142, 78), 0, getHeight(),
-				new Color(178, 197, 178));
-		g2d.setPaint(gradient);
-		g2d.fillRect(0, 0, getWidth(), getHeight());
+		Tema.pintarFondo(g, this);
 	}
-	
-	public JTextArea getAreaFuncionarios() {
-        return areaFuncionarios;
-    }
 
-    public PersonalButton getEliminarButton() {
-        return eliminarButton;
-    }
+	public Tabla getTabla() {
+		return tabla;
+	}
 
-    public PersonalButton getAtrasButton() {
-        return atrasButton;
-    }
+	/** Cédula del funcionario elegido en la tabla, o {@code null} si no hay ninguno. */
+	public String getCedulaSeleccionada() {
+		return (String) tabla.valorSeleccionado(0);
+	}
 
-    public PersonalButton getListarButton() {
-        return listarButton;
-    }
+	public PersonalButton getEliminarButton() {
+		return eliminarButton;
+	}
+
+	public PersonalButton getAtrasButton() {
+		return atrasButton;
+	}
 }

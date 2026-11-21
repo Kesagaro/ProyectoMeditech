@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,14 +94,20 @@ class FuncionariosDAOTest {
     }
 
     @Test
-    void elListadoNoMuestraContrasenas() {
+    void elListadoNoTraeContrasenas() {
         dao.guardarUsuario(new FuncionarioDTO("777", "secreta", "Ana Ruiz", "ana@mail.com"));
-        assertEquals("Cédula: 777 | Nombre: Ana Ruiz | Correo: ana@mail.com\n", dao.mostrarUsuarios());
+        List<FuncionarioDTO> funcionarios = dao.listar();
+        assertEquals(1, funcionarios.size());
+        assertEquals("FuncionarioDTO[cedula=777, nombre=Ana Ruiz, correo=ana@mail.com]", funcionarios.get(0).toString());
+        assertNull(funcionarios.get(0).getPassword());
     }
 
     @Test
-    void lasCuentasAntiguasSinNombreSeListanConGuion() throws Exception {
-        assertEquals("Cédula: 112233 | Nombre: - | Correo: -\n", desdeArchivoAntiguo("112233,112233\n").mostrarUsuarios());
+    void lasCuentasAntiguasSinNombreSeListanSinNombreNiCorreo() throws Exception {
+        FuncionarioDTO antiguo = desdeArchivoAntiguo("112233,112233\n").listar().get(0);
+        assertEquals("112233", antiguo.getCedula());
+        assertNull(antiguo.getNombre());
+        assertNull(antiguo.getCorreo());
     }
 
     @Test
@@ -133,6 +140,6 @@ class FuncionariosDAOTest {
     void sinFuncionariosRegistrados() {
         assertFalse(dao.existeCedula("1"));
         assertFalse(dao.verificarUsuario("1", "x"));
-        assertEquals("", dao.mostrarUsuarios());
+        assertEquals(List.of(), dao.listar());
     }
 }

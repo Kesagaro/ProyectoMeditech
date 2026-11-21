@@ -1,89 +1,75 @@
 package co.edu.unbosque.view;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.time.LocalDateTime;
+
+import javax.swing.Box;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 public class PanelOrdenes extends JPanel {
-	private TransparentPanel glassPanel;
 	private JTextField documentoField;
 	private JTextField entidadField;
 	private JTextField nombreMedicamentoField;
 	private JTextField cantidadField;
 	private PersonalButton agregarButton;
-	private PersonalButton verOrdenesButton;
-	private JTextArea areaOrdenes;
 	private PersonalButton atrasButton;
+	private Tabla tabla;
 
 	public PanelOrdenes() {
-		setLayout(null);
+		super(new BorderLayout());
+		atrasButton = new PersonalButton("Atrás", false);
+		add(Tema.encabezado(atrasButton, "Órdenes de pacientes", null), BorderLayout.NORTH);
 
-		glassPanel = new TransparentPanel();
-		glassPanel.setLayout(null);
-		glassPanel.setBounds(25, 50, 485, 390);
+		TransparentPanel formulario = new TransparentPanel();
+		formulario.setLayout(new GridBagLayout());
+		documentoField = new JTextField(12);
+		entidadField = new JTextField(12);
+		entidadField.putClientProperty("JTextField.placeholderText", "Ej.: EPS1");
+		nombreMedicamentoField = new JTextField(12);
+		cantidadField = new JTextField(12);
+		Tema.filaFormulario(formulario, 0, "Documento", documentoField);
+		Tema.filaFormulario(formulario, 1, "Entidad", entidadField);
+		Tema.filaFormulario(formulario, 2, "Medicamento", nombreMedicamentoField);
+		Tema.filaFormulario(formulario, 3, "Cantidad", cantidadField);
 
-		JLabel documentoLabel = new JLabel("Documento del paciente:");
-		documentoLabel.setBounds(15, 15, 190, 26);
-		glassPanel.add(documentoLabel);
+		agregarButton = new PersonalButton("Registrar orden");
+		cantidadField.addActionListener(e -> agregarButton.doClick());
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridy = 4;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(14, 0, 0, 0);
+		formulario.add(agregarButton, c);
+		c.gridy = 5;
+		c.weighty = 1;
+		formulario.add(Box.createVerticalGlue(), c);
+		formulario.setPreferredSize(new Dimension(290, formulario.getPreferredSize().height));
 
-		documentoField = new JTextField();
-		documentoField.setBounds(210, 15, 260, 26);
-		glassPanel.add(documentoField);
+		tabla = new Tabla(new String[] {"Fecha", "Documento", "Entidad", "Medicamento", "Cant.", "Total"},
+				new Class<?>[] {LocalDateTime.class, String.class, String.class, String.class, Integer.class, Double.class});
+		tabla.setMensajeVacio("No hay órdenes registradas.");
+		tabla.anchos(125, 100, 95, 160, 50, 85);
+		TransparentPanel listado = new TransparentPanel();
+		listado.setLayout(new BorderLayout());
+		listado.add(tabla);
 
-		JLabel codigoEntidadLabel = new JLabel("Código de la entidad:");
-		codigoEntidadLabel.setBounds(15, 50, 190, 26);
-		glassPanel.add(codigoEntidadLabel);
-
-		entidadField = new JTextField();
-		entidadField.setBounds(210, 50, 260, 26);
-		glassPanel.add(entidadField);
-
-		JLabel nombreMedicamentoLabel = new JLabel("Nombre del medicamento:");
-		nombreMedicamentoLabel.setBounds(15, 85, 190, 26);
-		glassPanel.add(nombreMedicamentoLabel);
-
-		nombreMedicamentoField = new JTextField();
-		nombreMedicamentoField.setBounds(210, 85, 260, 26);
-		glassPanel.add(nombreMedicamentoField);
-
-		JLabel cantidadLabel = new JLabel("Cantidad:");
-		cantidadLabel.setBounds(15, 120, 190, 26);
-		glassPanel.add(cantidadLabel);
-
-		cantidadField = new JTextField();
-		cantidadField.setBounds(210, 120, 260, 26);
-		glassPanel.add(cantidadField);
-
-		agregarButton = new PersonalButton("Agregar orden");
-		agregarButton.setBounds(15, 160, 220, 36);
-		glassPanel.add(agregarButton);
-
-		verOrdenesButton = new PersonalButton("Ver órdenes");
-		verOrdenesButton.setBounds(250, 160, 220, 36);
-		glassPanel.add(verOrdenesButton);
-
-		areaOrdenes = new JTextArea();
-		areaOrdenes.setEditable(false);
-		areaOrdenes.setLineWrap(true);
-		areaOrdenes.setWrapStyleWord(true);
-		JScrollPane scrollPane = new JScrollPane(areaOrdenes);
-		scrollPane.setBounds(15, 210, 455, 165);
-		glassPanel.add(scrollPane);
-
-		atrasButton = new PersonalButton("Atrás");
-		atrasButton.setBounds(5, 5, 100, 40);
-		add(atrasButton);
-
-		add(glassPanel);
+		JPanel centro = new JPanel(new BorderLayout(16, 0));
+		centro.setOpaque(false);
+		centro.add(formulario, BorderLayout.WEST);
+		centro.add(listado, BorderLayout.CENTER);
+		add(Tema.contenido(centro), BorderLayout.CENTER);
 	}
 
+	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		Graphics2D g2d = (Graphics2D) g;
-
-		GradientPaint gradient = new GradientPaint(0, 0, new Color(107, 142, 78), 0, getHeight(),
-				new Color(178, 197, 178));
-		g2d.setPaint(gradient);
-		g2d.fillRect(0, 0, getWidth(), getHeight());
+		Tema.pintarFondo(g, this);
 	}
 
 	public PersonalButton getAtrasButton() {
@@ -92,10 +78,6 @@ public class PanelOrdenes extends JPanel {
 
 	public PersonalButton getAgregarOrdenButton() {
 		return agregarButton;
-	}
-
-	public PersonalButton getVerOrdenesButton() {
-		return verOrdenesButton;
 	}
 
 	public JTextField getDocumentoField() {
@@ -114,8 +96,7 @@ public class PanelOrdenes extends JPanel {
 		return cantidadField;
 	}
 
-	public JTextArea getAreaOrdenes() {
-		return areaOrdenes;
+	public Tabla getTabla() {
+		return tabla;
 	}
-
 }
