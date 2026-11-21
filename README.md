@@ -14,16 +14,16 @@ Nació como proyecto académico y se está refactorizando por ciclos (ver [Roadm
 2. Descargar [**BosqueFarma.jar**](https://github.com/Kesagaro/ProyectoMeditech/releases/latest/download/BosqueFarma.jar) desde la [última release](https://github.com/Kesagaro/ProyectoMeditech/releases/latest).
 3. Abrirlo con doble clic o con `java -jar BosqueFarma.jar`.
 
-La primera vez, crea tu usuario con **Registrar**. Los datos se guardan en la carpeta `data/` junto al `.jar`.
+La primera vez, crea tu usuario con **Registrar funcionario**. Los datos se guardan en la carpeta `data/` junto al `.jar`.
 
 ## Funcionalidades
 
 - Registro (cédula, nombre, correo) e inicio de sesión de funcionarios; el menú muestra quién inició sesión
-- Inventario: agregar, actualizar, listar y eliminar medicamentos por ID
+- Inventario en una tabla ordenable: agregar, actualizar y eliminar medicamentos; al elegir una fila sus datos pasan al formulario para editarlos
 - Búsqueda de medicamentos por nombre con precio y stock
 - Turnos de atención asociados a la cédula del paciente; la numeración se conserva al cerrar la aplicación y vuelve a 1 cada día
 - Órdenes de pacientes que validan el medicamento y el stock disponible, lo descuentan del inventario y registran fecha y total en pesos
-- Listado y eliminación de funcionarios
+- Tabla de funcionarios (sin contraseñas); se elimina el que se elija en la tabla
 - Reportes: Top 5 de medicamentos más expendidos, calculado con las órdenes registradas
 
 ## Capturas
@@ -43,7 +43,7 @@ Capturas tomadas de la aplicación con datos de ejemplo.
 ## Tecnologías
 
 - Java 17+ (probado con JDK 17, 21 y 25)
-- Swing (CardLayout, componentes personalizados)
+- Swing con [FlatLaf](https://www.formdev.com/flatlaf/) (apariencia moderna), tablas ordenables y un tema propio de colores y fuentes (`Tema`)
 - SQLite con JDBC (base incrustada en un archivo, sin servidor que instalar)
 - Maven (con Maven Wrapper) y JUnit 5
 - GitHub Actions: compila y ejecuta las pruebas en cada push y pull request
@@ -90,7 +90,7 @@ src/main/java/co/edu/unbosque/
 ├── controller/          Main (punto de entrada) y Controller (eventos vista → modelo)
 ├── model/               Farmacia (fachada y reglas de negocio), Resultado y Turnos
 │   └── persistence/     BaseDeDatos (SQLite), DAO y DTO de funcionarios, medicamentos, órdenes y turnos; importación de archivos antiguos
-└── view/                View (JFrame + CardLayout) y un panel por pantalla
+└── view/                View (JFrame + CardLayout), un panel por pantalla, Tema (FlatLaf, colores y fuentes) y Tabla
 
 src/main/resources/            Logo de la aplicación
 src/test/java/co/edu/unbosque/ Pruebas JUnit del modelo y la persistencia
@@ -132,6 +132,10 @@ Los datos se guardan en una base **SQLite** en `data/bosquefarma.db`. SQLite va 
 - [x] **Ciclo 10: Mejoras funcionales.** Órdenes con fecha y total, turnos persistentes, sesión del funcionario.
 - [x] **Ciclo 11: Presentación.** README en inglés y metadatos del repositorio.
 - [x] **Ciclo 12: Base de datos.** Persistencia en SQLite con JDBC.
+
+### Fase 3
+
+- [x] **Ciclo 13: Interfaz moderna.** FlatLaf, tablas ordenables en inventario, órdenes, funcionarios, búsqueda y Top 5, y un diseño común para todas las pantallas.
 
 ## Documentación
 
