@@ -2,6 +2,7 @@ package co.edu.unbosque.controller;
 
 import co.edu.unbosque.view.View;
 
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import java.io.File;
 
@@ -12,6 +13,14 @@ public class Main {
         UIManager.put("OptionPane.noButtonText", "No");
         UIManager.put("OptionPane.cancelButtonText", "Cancelar");
         UIManager.put("OptionPane.okButtonText", "Aceptar");
+        // Un error de la base de datos (archivo bloqueado, sin permisos...) se informa en pantalla
+        Thread.setDefaultUncaughtExceptionHandler((hilo, error) -> {
+            error.printStackTrace();
+            JOptionPane.showMessageDialog(null, error.getMessage(), "BosqueFarma: error", JOptionPane.ERROR_MESSAGE);
+            if (hilo.getName().equals("main")) {
+                System.exit(1); // sin datos la aplicación no puede arrancar
+            }
+        });
         View view = new View(); // Crear la vista
         new Controller(view, carpetaDatos());
     }
