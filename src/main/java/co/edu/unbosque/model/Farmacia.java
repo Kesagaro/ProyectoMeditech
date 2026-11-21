@@ -79,9 +79,6 @@ public class Farmacia {
         cedula = cedula.trim();
         nombre = nombre.trim();
         correo = correo.trim();
-        if (tieneComas(cedula, password, nombre, correo)) {
-            return Resultado.error("Los datos no pueden contener comas.");
-        }
         if (!correo.matches(CORREO_VALIDO)) {
             return Resultado.error("Ingrese un correo válido.");
         }
@@ -221,9 +218,6 @@ public class Farmacia {
         documento = documento.trim();
         codigoEntidad = codigoEntidad.trim();
         nombreMedicamento = nombreMedicamento.trim();
-        if (tieneComas(documento, codigoEntidad, nombreMedicamento)) {
-            return Resultado.error("Los datos no pueden contener comas.");
-        }
         int unidades;
         try {
             unidades = Integer.parseInt(cantidad.trim());
@@ -302,15 +296,5 @@ public class Farmacia {
 
     private static boolean vacio(String texto) {
         return texto == null || texto.isBlank();
-    }
-
-    /** Los archivos de datos separan los campos con comas. */
-    private static boolean tieneComas(String... textos) {
-        for (String texto : textos) {
-            if (texto.contains(",")) {
-                return true;
-            }
-        }
-        return false;
     }
 }
