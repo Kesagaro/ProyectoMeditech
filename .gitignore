@@ -4,7 +4,10 @@ bin/
 out/
 *.class
 
-# Datos generados en ejecución (usuarios.txt se versiona como demo)
+# Datos generados en ejecución. usuarios.txt se versiona como demo: al crear la base se importa
+# (junto con los demás archivos del formato anterior, si existen)
+data/bosquefarma.db
+data/bosquefarma.db-journal
 data/Medicamentos.txt
 data/ordenes.txt
 data/turnos.txt

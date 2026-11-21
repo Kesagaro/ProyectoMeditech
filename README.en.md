@@ -44,7 +44,7 @@ Screenshots taken from the application with sample data.
 
 - Java 17+ (tested with JDK 17, 21 and 25)
 - Swing (CardLayout, custom components)
-- File persistence: plain text and Java serialization
+- SQLite with JDBC (embedded database in a single file, no server to install)
 - Maven (with Maven Wrapper) and JUnit 5
 - GitHub Actions: builds and runs the tests on every push and pull request, and publishes the `.jar` on each release tag
 
@@ -75,7 +75,7 @@ Pushing a tag that matches the `pom.xml` version (for example `v1.1.0`) makes Gi
 
 ## Tests
 
-The JUnit 5 tests live in `src/test/java`. They cover queue numbers, the business rules (input validation, orders, stock, top 5) and the persistence of staff (password hashing and migration), medicines and orders. Each test works in a temporary folder and never touches `data/`.
+The JUnit 5 tests live in `src/test/java`. They cover queue numbers, the business rules (input validation, orders, stock, top 5) and the persistence of staff (password hashing), medicines, orders (sale and stock deduction in one transaction) and the import of files from older versions. Each test uses a database in a temporary folder and never touches `data/`.
 
 ```bash
 ./mvnw test
@@ -89,7 +89,7 @@ In VS Code they also appear in the **Testing** view (flask icon). GitHub Actions
 src/main/java/co/edu/unbosque/
 ├── controller/          Main (entry point) and Controller (view events → model)
 ├── model/               Farmacia (facade and business rules), Resultado and Turnos
-│   └── persistence/     DAOs and DTOs for staff, medicines and orders; Crud<T> interface
+│   └── persistence/     BaseDeDatos (SQLite), DAOs and DTOs for staff, medicines, orders and queue numbers; legacy file import
 └── view/                View (JFrame + CardLayout) and one panel per screen
 
 src/main/resources/            Application logo
@@ -104,12 +104,16 @@ Editable Astah model: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/BosqueF
 
 ### Persistence
 
-| File | Format | Contents |
+Data is stored in a **SQLite** database at `data/bosquefarma.db`. SQLite ships inside the `.jar` as a library: there is no server to install or configure. Every query uses `PreparedStatement`, and recording an order deducts the stock in the same transaction.
+
+| Table | Columns | Contents |
 |---|---|---|
-| `data/usuarios.txt` | text `id,hash,name,email` | Staff; passwords are stored as salted PBKDF2 hashes |
-| `data/Medicamentos.txt` | Java serialization | Inventory |
-| `data/ordenes.txt` | text `document,provider,medicine,quantity,date,total` | Orders (older lines without date and total are still read) |
-| `data/turnos.txt` | text `date,nextNumber` | Today's queue number |
+| `funcionarios` | `cedula`, `password`, `nombre`, `correo` | Staff; passwords are stored as salted PBKDF2 hashes |
+| `medicamentos` | `id`, `nombre`, `empresa`, `precio`, `cantidad` | Inventory (stock can never go negative) |
+| `ordenes` | `id`, `documento`, `entidad`, `medicamento`, `cantidad`, `fecha`, `total` | Orders; those imported from older versions have no date or total |
+| `turnos` | `dia`, `siguiente` | Today's next queue number |
+
+**Upgrading from version 1.1.0 or earlier:** when the database is first created, the application imports the files those versions used (`usuarios.txt`, `Medicamentos.txt`, `ordenes.txt` and `turnos.txt`) and leaves them untouched as a backup. This is also how the demo user in `data/usuarios.txt` is loaded.
 
 ## Roadmap
 
@@ -127,7 +131,7 @@ Editable Astah model: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/BosqueF
 - [x] **Cycle 9: Rules in the model.** Controller validations moved into the model, with tests.
 - [x] **Cycle 10: Functional improvements.** Orders with date and total, persistent queue numbers, signed-in staff member.
 - [x] **Cycle 11: Presentation.** English README and repository metadata.
-- [ ] **Cycle 12: Database.** SQLite persistence with JDBC.
+- [x] **Cycle 12: Database.** SQLite persistence with JDBC.
 
 ## Documentation
 
