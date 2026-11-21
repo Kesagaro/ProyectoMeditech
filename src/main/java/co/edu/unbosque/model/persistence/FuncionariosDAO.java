@@ -1,149 +1,125 @@
 package co.edu.unbosque.model.persistence;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
-import java.util.ArrayList;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Base64;
-import java.util.List;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 /**
- * Funcionarios en data/usuarios.txt, una línea por funcionario: cedula,contraseña,nombre,correo.
+ * Funcionarios en la tabla funcionarios (cedula, password, nombre, correo).
  * La contraseña se guarda como hash PBKDF2 con sal aleatoria: pbkdf2$iteraciones$sal$hash.
- * Las líneas antiguas (contraseña en texto plano, con o sin nombre y correo) se aceptan y se
- * convierten a hash la primera vez que el funcionario inicia sesión.
+ * Las cuentas importadas del formato anterior pueden tener la contraseña en texto plano;
+ * se convierte a hash la primera vez que el funcionario inicia sesión.
  */
 public class FuncionariosDAO {
-    private final Path archivo;
+    private final BaseDeDatos bd;
     private static final String PREFIJO_HASH = "pbkdf2$";
     private static final int ITERACIONES = 65536;
     private static final int BYTES_SAL = 16;
     private static final int BITS_HASH = 256;
     private static final SecureRandom ALEATORIO = new SecureRandom();
 
-    public FuncionariosDAO() {
-        this(Paths.get("data"));
-    }
-
-    /** Permite usar otra carpeta de datos, por ejemplo una temporal en las pruebas. */
-    public FuncionariosDAO(Path directorio) {
-        this.archivo = directorio.resolve("usuarios.txt");
+    public FuncionariosDAO(BaseDeDatos bd) {
+        this.bd = bd;
     }
 
     public void guardarUsuario(FuncionarioDTO funcionario) {
-        String linea = String.join(",", funcionario.getCedula(), hashear(funcionario.getPassword()),
-                funcionario.getNombre(), funcionario.getCorreo());
-        try {
-            Files.createDirectories(archivo.getParent());
-            Files.writeString(archivo, linea + System.lineSeparator(), StandardCharsets.UTF_8,
-                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-        } catch (IOException e) {
-            System.err.println("Error al guardar el funcionario: " + e.getMessage());
+        try (Connection conexion = bd.conectar();
+                PreparedStatement sql = conexion.prepareStatement(
+                        "INSERT INTO funcionarios (cedula, password, nombre, correo) VALUES (?, ?, ?, ?)")) {
+            sql.setString(1, funcionario.getCedula());
+            sql.setString(2, hashear(funcionario.getPassword()));
+            sql.setString(3, funcionario.getNombre());
+            sql.setString(4, funcionario.getCorreo());
+            sql.executeUpdate();
+        } catch (SQLException e) {
+            throw new ErrorDeDatos("No se pudo guardar el funcionario", e);
         }
     }
 
     public boolean verificarUsuario(String cedula, String password) {
-        List<String> lineas = leerLineas();
-        for (int i = 0; i < lineas.size(); i++) {
-            String[] datos = lineas.get(i).split(",", -1);
-            if (datos.length < 2 || !datos[0].equals(cedula)) {
-                continue;
-            }
-            if (datos[1].startsWith(PREFIJO_HASH)) {
-                return coincide(password, datos[1]);
-            }
-            // contraseña antigua en texto plano: si coincide, se reemplaza por su hash
-            if (!datos[1].equals(password)) {
-                return false;
-            }
-            datos[1] = hashear(password);
-            lineas.set(i, String.join(",", datos));
-            escribirLineas(lineas);
-            return true;
+        String guardada = consultar("SELECT password FROM funcionarios WHERE cedula = ?", cedula);
+        if (guardada == null) {
+            return false;
         }
-        return false;
+        if (guardada.startsWith(PREFIJO_HASH)) {
+            return coincide(password, guardada);
+        }
+        // contraseña antigua en texto plano: si coincide, se reemplaza por su hash
+        if (!guardada.equals(password)) {
+            return false;
+        }
+        try (Connection conexion = bd.conectar();
+                PreparedStatement sql = conexion.prepareStatement("UPDATE funcionarios SET password = ? WHERE cedula = ?")) {
+            sql.setString(1, hashear(password));
+            sql.setString(2, cedula);
+            sql.executeUpdate();
+        } catch (SQLException e) {
+            throw new ErrorDeDatos("No se pudo actualizar la contraseña", e);
+        }
+        return true;
     }
 
     /** Nombre del funcionario, o {@code null} si no existe o es una cuenta antigua sin nombre. */
     public String buscarNombre(String cedula) {
-        for (String linea : leerLineas()) {
-            String[] datos = linea.split(",", -1);
-            if (datos[0].equals(cedula)) {
-                return datos.length > 2 && !datos[2].isBlank() ? datos[2] : null;
-            }
-        }
-        return null;
+        String nombre = consultar("SELECT nombre FROM funcionarios WHERE cedula = ?", cedula);
+        return nombre == null || nombre.isBlank() ? null : nombre;
     }
 
     public boolean existeCedula(String cedula) {
-        for (String linea : leerLineas()) {
-            if (linea.split(",", -1)[0].equals(cedula)) {
-                return true;
-            }
-        }
-        return false;
+        return consultar("SELECT cedula FROM funcionarios WHERE cedula = ?", cedula) != null;
     }
 
     public String eliminarPorCedula(String cedula) {
-        List<String> lineas = leerLineas();
-        boolean eliminado = lineas.removeIf(linea -> linea.split(",", -1)[0].equals(cedula));
-        if (!eliminado) {
-            return "Usuario no encontrado.";
+        try (Connection conexion = bd.conectar();
+                PreparedStatement sql = conexion.prepareStatement("DELETE FROM funcionarios WHERE cedula = ?")) {
+            sql.setString(1, cedula);
+            return sql.executeUpdate() > 0 ? "Usuario eliminado con éxito." : "Usuario no encontrado.";
+        } catch (SQLException e) {
+            throw new ErrorDeDatos("No se pudo eliminar el funcionario", e);
         }
-        return escribirLineas(lineas) ? "Usuario eliminado con éxito." : "Error al eliminar el usuario.";
     }
 
     public String mostrarUsuarios() {
         StringBuilder usuarios = new StringBuilder();
-        for (String linea : leerLineas()) {
-            String[] datos = linea.split(",", -1);
-            if (datos.length < 2 || datos[0].isBlank()) {
-                continue;
+        // nunca se consulta ni se muestra la contraseña
+        try (Connection conexion = bd.conectar();
+                PreparedStatement sql = conexion.prepareStatement(
+                        "SELECT cedula, nombre, correo FROM funcionarios ORDER BY rowid");
+                ResultSet filas = sql.executeQuery()) {
+            while (filas.next()) {
+                usuarios.append("Cédula: ").append(filas.getString("cedula"))
+                        .append(" | Nombre: ").append(guion(filas.getString("nombre")))
+                        .append(" | Correo: ").append(guion(filas.getString("correo")))
+                        .append("\n");
             }
-            // nunca se muestra la contraseña (datos[1])
-            usuarios.append("Cédula: ").append(datos[0])
-                    .append(" | Nombre: ").append(datos.length > 2 ? datos[2] : "-")
-                    .append(" | Correo: ").append(datos.length > 3 ? datos[3] : "-")
-                    .append("\n");
+        } catch (SQLException e) {
+            throw new ErrorDeDatos("No se pudieron leer los funcionarios", e);
         }
         return usuarios.toString();
     }
 
-    private List<String> leerLineas() {
-        if (!Files.exists(archivo)) {
-            return new ArrayList<>();
-        }
-        try {
-            List<String> lineas = new ArrayList<>(Files.readAllLines(archivo, StandardCharsets.UTF_8));
-            lineas.removeIf(String::isBlank);
-            return lineas;
-        } catch (IOException e) {
-            System.err.println("Error al leer los funcionarios: " + e.getMessage());
-            return new ArrayList<>();
+    /** Primera columna de la primera fila, o {@code null} si no hay filas. */
+    private String consultar(String consulta, String cedula) {
+        try (Connection conexion = bd.conectar(); PreparedStatement sql = conexion.prepareStatement(consulta)) {
+            sql.setString(1, cedula);
+            try (ResultSet filas = sql.executeQuery()) {
+                return filas.next() ? filas.getString(1) : null;
+            }
+        } catch (SQLException e) {
+            throw new ErrorDeDatos("No se pudieron leer los funcionarios", e);
         }
     }
 
-    /** Escribe en un archivo temporal y luego lo reemplaza, para no dejar el original a medias. */
-    private boolean escribirLineas(List<String> lineas) {
-        Path temporal = archivo.resolveSibling("temp_usuarios.txt");
-        try {
-            Files.write(temporal, lineas, StandardCharsets.UTF_8);
-            Files.move(temporal, archivo, StandardCopyOption.REPLACE_EXISTING);
-            return true;
-        } catch (IOException e) {
-            System.err.println("Error al actualizar los funcionarios: " + e.getMessage());
-            return false;
-        }
+    private static String guion(String texto) {
+        return texto == null || texto.isBlank() ? "-" : texto;
     }
 
     private static String hashear(String password) {

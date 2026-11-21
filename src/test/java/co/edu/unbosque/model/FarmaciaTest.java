@@ -7,10 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.List;
+
+import co.edu.unbosque.model.persistence.BaseDeDatos;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,16 +71,23 @@ class FarmaciaTest {
     @Test
     void laOrdenGuardaFechaYTotal() throws Exception {
         farmacia.agregarOrden("1010", "EPS1", "PARACETAMOL", 2);
-        List<String> lineas = Files.readAllLines(Path.of(datos.getPath(), "ordenes.txt"));
-        assertEquals(List.of("1010,EPS1,Paracetamol,2,2026-11-19T14:30,3000.0"), lineas,
-                "nombre normalizado, fecha sin segundos y total = precio x cantidad");
+        try (Connection conexion = new BaseDeDatos(datos).conectar();
+                ResultSet fila = conexion.createStatement().executeQuery(
+                        "SELECT documento, entidad, medicamento, cantidad, fecha, total FROM ordenes")) {
+            assertTrue(fila.next());
+            assertEquals("1010,EPS1,Paracetamol,2,2026-11-19T14:30,3000.0",
+                    String.join(",", fila.getString(1), fila.getString(2), fila.getString(3),
+                            String.valueOf(fila.getInt(4)), fila.getString(5), String.valueOf(fila.getDouble(6))),
+                    "nombre normalizado, fecha sin segundos y total = precio x cantidad");
+            assertFalse(fila.next());
+        }
     }
 
     @Test
-    void lasOrdenesAntiguasSeListanSinFechaNiTotal() throws Exception {
-        Files.writeString(Path.of(datos.getPath(), "ordenes.txt"), "1010,EPS1,Paracetamol,3\n");
+    void lasOrdenesAntiguasSeListanSinFechaNiTotal(@TempDir File antigua) throws Exception {
+        Files.writeString(Path.of(antigua.getPath(), "ordenes.txt"), "1010,EPS1,Paracetamol,3\n");
         assertEquals("Sin fecha | Documento: 1010 | Entidad: EPS1 | Paracetamol x 3 | Total: -\n",
-                new Farmacia(datos, RELOJ).listarOrdenes());
+                new Farmacia(antigua, RELOJ).listarOrdenes());
     }
 
     @Test

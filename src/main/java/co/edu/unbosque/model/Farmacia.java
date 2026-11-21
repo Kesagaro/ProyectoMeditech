@@ -1,11 +1,13 @@
 package co.edu.unbosque.model;
 
+import co.edu.unbosque.model.persistence.BaseDeDatos;
 import co.edu.unbosque.model.persistence.MedicamentoDAO;
 import co.edu.unbosque.model.persistence.MedicamentoDTO;
 import co.edu.unbosque.model.persistence.FuncionarioDTO;
 import co.edu.unbosque.model.persistence.FuncionariosDAO;
 import co.edu.unbosque.model.persistence.OrdenDAO;
 import co.edu.unbosque.model.persistence.OrdenDTO;
+import co.edu.unbosque.model.persistence.TurnoDAO;
 
 import java.io.File;
 import java.text.NumberFormat;
@@ -45,10 +47,11 @@ public class Farmacia {
     /** Permite además fijar la fecha y hora, para probar órdenes y turnos. */
     public Farmacia(File directorioDatos, Clock reloj) {
         this.reloj = reloj;
-        this.medicamentoDAO = new MedicamentoDAO(directorioDatos);
-        this.usuarioDAO = new FuncionariosDAO(directorioDatos.toPath());
-        this.ordenDAO = new OrdenDAO(directorioDatos);
-        this.turnos = new Turnos(new File(directorioDatos, "turnos.txt"), reloj);
+        BaseDeDatos bd = new BaseDeDatos(directorioDatos);
+        this.medicamentoDAO = new MedicamentoDAO(bd);
+        this.usuarioDAO = new FuncionariosDAO(bd);
+        this.ordenDAO = new OrdenDAO(bd);
+        this.turnos = new Turnos(new TurnoDAO(bd), reloj);
     }
 
     // ---------------------------------------------------------------- funcionarios
@@ -246,12 +249,14 @@ public class Farmacia {
             return Resultado.error("Stock insuficiente: quedan " + medicamento.getCantidad() + " unidades de "
                     + medicamento.getNombre() + ".");
         }
-        medicamentoDAO.descontarStock(medicamento, cantidad);
         double total = (double) medicamento.getPrecio() * cantidad;
         LocalDateTime fecha = LocalDateTime.now(reloj).truncatedTo(ChronoUnit.MINUTES);
-        ordenDAO.agregarOrden(new OrdenDTO(documento, codigoEntidad, medicamento.getNombre(), cantidad, fecha, total));
+        OrdenDTO orden = new OrdenDTO(documento, codigoEntidad, medicamento.getNombre(), cantidad, fecha, total);
+        if (!ordenDAO.registrarVenta(orden, medicamento.getNumId())) {
+            return Resultado.error("Stock insuficiente para " + medicamento.getNombre() + ".");
+        }
         return Resultado.ok("Orden agregada por " + pesos(total) + ". Stock restante de " + medicamento.getNombre() + ": "
-                + medicamento.getCantidad() + ".");
+                + (medicamento.getCantidad() - cantidad) + ".");
     }
     
     public String top5Medicamentos() {

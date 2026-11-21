@@ -2,8 +2,10 @@ package co.edu.unbosque.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import co.edu.unbosque.model.persistence.BaseDeDatos;
+import co.edu.unbosque.model.persistence.TurnoDAO;
+
 import java.io.File;
-import java.nio.file.Files;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -28,27 +30,25 @@ class TurnosTest {
 
     @Test
     void elTurnoSeConservaAlReabrirElMismoDia(@TempDir File datos) {
-        File archivo = new File(datos, "turnos.txt");
         Clock hoy = reloj("2026-11-19T15:00:00Z");
-        Turnos turnos = new Turnos(archivo, hoy);
+        Turnos turnos = new Turnos(dao(datos), hoy);
         turnos.generarTurno();
         turnos.generarTurno();
 
-        assertEquals(3, new Turnos(archivo, hoy).generarTurno(), "sigue la numeración tras cerrar la app");
+        assertEquals(3, new Turnos(dao(datos), hoy).generarTurno(), "sigue la numeración tras cerrar la app");
     }
 
     @Test
     void laNumeracionVuelveAUnoAlDiaSiguiente(@TempDir File datos) {
-        File archivo = new File(datos, "turnos.txt");
-        new Turnos(archivo, reloj("2026-11-19T15:00:00Z")).generarTurno();
+        new Turnos(dao(datos), reloj("2026-11-19T15:00:00Z")).generarTurno();
 
-        assertEquals(1, new Turnos(archivo, reloj("2026-11-20T15:00:00Z")).generarTurno());
+        assertEquals(1, new Turnos(dao(datos), reloj("2026-11-20T15:00:00Z")).generarTurno());
     }
 
     @Test
     void cambiaDeDiaConLaAplicacionAbierta(@TempDir File datos) {
         MutableClock reloj = new MutableClock(Instant.parse("2026-11-19T23:00:00Z"));
-        Turnos turnos = new Turnos(new File(datos, "turnos.txt"), reloj);
+        Turnos turnos = new Turnos(dao(datos), reloj);
         assertEquals(1, turnos.generarTurno());
         assertEquals(2, turnos.generarTurno());
         reloj.instante = Instant.parse("2026-11-20T13:00:00Z");
@@ -56,10 +56,18 @@ class TurnosTest {
     }
 
     @Test
-    void unArchivoDanadoEmpiezaEnUno(@TempDir File datos) throws Exception {
-        File archivo = new File(datos, "turnos.txt");
-        Files.writeString(archivo.toPath(), "esto no es un turno");
-        assertEquals(1, new Turnos(archivo, reloj("2026-11-19T15:00:00Z")).generarTurno());
+    void reiniciarTambienSeGuarda(@TempDir File datos) {
+        Clock hoy = reloj("2026-11-19T15:00:00Z");
+        Turnos turnos = new Turnos(dao(datos), hoy);
+        turnos.generarTurno();
+        turnos.generarTurno();
+        turnos.reiniciarTurnos();
+        assertEquals(1, new Turnos(dao(datos), hoy).generarTurno());
+    }
+
+    /** Cada llamada abre la base otra vez, como al reiniciar la aplicación. */
+    private static TurnoDAO dao(File datos) {
+        return new TurnoDAO(new BaseDeDatos(datos));
     }
 
     private static Clock reloj(String instante) {

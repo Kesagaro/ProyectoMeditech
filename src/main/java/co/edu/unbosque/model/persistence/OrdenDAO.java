@@ -1,84 +1,92 @@
 package co.edu.unbosque.model.persistence;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Órdenes en la tabla ordenes; la fecha se guarda en formato ISO (2026-11-19T14:30). */
 public class OrdenDAO {
-    private final File directorio;
-    private final File archivo;
-    private List<OrdenDTO> ordenes;
+    private final BaseDeDatos bd;
 
-    public OrdenDAO() {
-        this(new File("data"));
-    }
-
-    /** Permite usar otra carpeta de datos, por ejemplo una temporal en las pruebas. */
-    public OrdenDAO(File directorio) {
-        this.directorio = directorio;
-        this.archivo = new File(directorio, "ordenes.txt");
-        ordenes = new ArrayList<>();
-        cargarOrdenesDesdeArchivo();
+    public OrdenDAO(BaseDeDatos bd) {
+        this.bd = bd;
     }
 
     public void agregarOrden(OrdenDTO orden) {
-        ordenes.add(orden);
-        guardarOrdenEnArchivo(orden);
+        try (Connection conexion = bd.conectar()) {
+            insertar(conexion, orden);
+        } catch (SQLException e) {
+            throw new ErrorDeDatos("No se pudo guardar la orden", e);
+        }
+    }
+
+    /**
+     * Descuenta el stock del medicamento y guarda la orden en una sola transacción: o se hacen
+     * las dos cosas o ninguna. Devuelve {@code false} si ya no hay stock suficiente.
+     */
+    public boolean registrarVenta(OrdenDTO orden, long idMedicamento) {
+        try (Connection conexion = bd.conectar()) {
+            conexion.setAutoCommit(false);
+            try (PreparedStatement descontar = conexion.prepareStatement(
+                    "UPDATE medicamentos SET cantidad = cantidad - ? WHERE id = ? AND cantidad >= ?")) {
+                descontar.setInt(1, orden.getCantidadMedicamento());
+                descontar.setLong(2, idMedicamento);
+                descontar.setInt(3, orden.getCantidadMedicamento());
+                if (descontar.executeUpdate() == 0) {
+                    conexion.rollback();
+                    return false;
+                }
+                insertar(conexion, orden);
+                conexion.commit();
+                return true;
+            } catch (SQLException e) {
+                conexion.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            throw new ErrorDeDatos("No se pudo registrar la orden", e);
+        }
     }
 
     public List<OrdenDTO> listarOrdenes() {
+        List<OrdenDTO> ordenes = new ArrayList<>();
+        try (Connection conexion = bd.conectar();
+                PreparedStatement sql = conexion.prepareStatement(
+                        "SELECT documento, entidad, medicamento, cantidad, fecha, total FROM ordenes ORDER BY id");
+                ResultSet filas = sql.executeQuery()) {
+            while (filas.next()) {
+                String fecha = filas.getString("fecha");
+                double valor = filas.getDouble("total");
+                Double total = filas.wasNull() ? null : valor; // las órdenes antiguas no tienen total
+                ordenes.add(new OrdenDTO(filas.getString("documento"), filas.getString("entidad"),
+                        filas.getString("medicamento"), filas.getInt("cantidad"),
+                        fecha == null ? null : LocalDateTime.parse(fecha), total));
+            }
+        } catch (SQLException e) {
+            throw new ErrorDeDatos("No se pudieron leer las órdenes", e);
+        }
         return ordenes;
     }
 
-    private void guardarOrdenEnArchivo(OrdenDTO orden) {
-        try {
-            directorio.mkdirs();
-
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(archivo, StandardCharsets.UTF_8, true))) {
-                bw.write(orden.getDocumentoPaciente() + "," + orden.getCodigoEntidad() + ","
-                        + orden.getNombreMedicamento() + "," + orden.getCantidadMedicamento() + ","
-                        + (orden.getFecha() == null ? "" : orden.getFecha().toString()) + ","
-                        + (orden.getTotal() == null ? "" : orden.getTotal().toString()));
-                bw.newLine();
+    static void insertar(Connection conexion, OrdenDTO orden) throws SQLException {
+        try (PreparedStatement sql = conexion.prepareStatement(
+                "INSERT INTO ordenes (documento, entidad, medicamento, cantidad, fecha, total) VALUES (?, ?, ?, ?, ?, ?)")) {
+            sql.setString(1, orden.getDocumentoPaciente());
+            sql.setString(2, orden.getCodigoEntidad());
+            sql.setString(3, orden.getNombreMedicamento());
+            sql.setInt(4, orden.getCantidadMedicamento());
+            sql.setString(5, orden.getFecha() == null ? null : orden.getFecha().toString());
+            if (orden.getTotal() == null) {
+                sql.setNull(6, Types.REAL);
+            } else {
+                sql.setDouble(6, orden.getTotal());
             }
-        } catch (IOException e) {
-            System.err.println("Error al guardar la orden en el archivo: " + e.getMessage());
+            sql.executeUpdate();
         }
     }
-
-    private void cargarOrdenesDesdeArchivo() {
-        File file = archivo;
-        if (!file.exists()) return;
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
-            String linea;
-            int numero = 0;
-            while ((linea = br.readLine()) != null) {
-                numero++;
-                if (linea.isBlank()) continue;
-                String[] datos = linea.split(",", -1);
-                try {
-                    // formato actual: documento,entidad,medicamento,cantidad,fecha,total
-                    // formato antiguo (sin fecha ni total): documento,entidad,medicamento,cantidad
-                    if (datos.length != 4 && datos.length != 6) {
-                        throw new IllegalArgumentException("se esperaban 4 o 6 campos");
-                    }
-                    int cantidad = Integer.parseInt(datos[3].trim());
-                    if (cantidad <= 0) throw new IllegalArgumentException("cantidad no positiva");
-                    LocalDateTime fecha = datos.length == 6 && !datos[4].isBlank() ? LocalDateTime.parse(datos[4].trim()) : null;
-                    Double total = datos.length == 6 && !datos[5].isBlank() ? Double.valueOf(datos[5].trim()) : null;
-                    ordenes.add(new OrdenDTO(datos[0].trim(), datos[1].trim(), datos[2].trim(), cantidad, fecha, total));
-                } catch (IllegalArgumentException | DateTimeParseException e) {
-                    // una línea dañada no impide cargar las demás
-                    System.err.println("Orden ignorada en la línea " + numero + " de " + archivo.getPath() + ": " + e.getMessage());
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Error al cargar las órdenes desde el archivo: " + e.getMessage());
-        }
-    }
-
 }

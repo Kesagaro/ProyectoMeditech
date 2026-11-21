@@ -1,19 +1,16 @@
 package co.edu.unbosque.model;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import co.edu.unbosque.model.persistence.TurnoDAO;
+
 import java.time.Clock;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 
 /**
- * Numeración de turnos de atención. Con archivo, el turno siguiente se conserva al cerrar la
- * aplicación y la numeración vuelve a 1 cada día (formato del archivo: fecha,turnoSiguiente).
+ * Numeración de turnos de atención. Con base de datos, el turno siguiente se conserva al cerrar
+ * la aplicación; la numeración vuelve a 1 cada día.
  */
 public class Turnos {
-    private final File archivo;
+    private final TurnoDAO dao;
     private final Clock reloj;
     private LocalDate dia;
     private int turnoActual;
@@ -23,12 +20,11 @@ public class Turnos {
         this(null, Clock.systemDefaultZone());
     }
 
-    public Turnos(File archivo, Clock reloj) {
-        this.archivo = archivo;
+    public Turnos(TurnoDAO dao, Clock reloj) {
+        this.dao = dao;
         this.reloj = reloj;
         this.dia = LocalDate.now(reloj);
-        this.turnoActual = 1;
-        cargar();
+        this.turnoActual = dao == null ? 1 : dao.turnoSiguiente(dia);
     }
 
     public int generarTurno() {
@@ -48,32 +44,9 @@ public class Turnos {
         guardar();
     }
 
-    private void cargar() {
-        if (archivo == null || !archivo.exists()) {
-            return;
-        }
-        try {
-            String[] datos = Files.readString(archivo.toPath(), StandardCharsets.UTF_8).trim().split(",");
-            if (datos.length == 2 && LocalDate.parse(datos[0]).equals(dia)) {
-                turnoActual = Math.max(1, Integer.parseInt(datos[1]));
-            }
-        } catch (IOException | DateTimeParseException | NumberFormatException e) {
-            System.err.println("No se pudo leer el turno guardado (" + e.getMessage() + "); se empieza en 1.");
-        }
-    }
-
     private void guardar() {
-        if (archivo == null) {
-            return;
-        }
-        try {
-            File carpeta = archivo.getParentFile();
-            if (carpeta != null) {
-                carpeta.mkdirs();
-            }
-            Files.writeString(archivo.toPath(), dia + "," + turnoActual, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            System.err.println("No se pudo guardar el turno: " + e.getMessage());
+        if (dao != null) {
+            dao.guardar(dia, turnoActual);
         }
     }
 }
