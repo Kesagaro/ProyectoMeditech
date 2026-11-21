@@ -91,6 +91,15 @@ class FarmaciaTest {
     }
 
     @Test
+    void aceptaComasEnLosDatos() {
+        farmacia.agregarMedicamento(3, "Vitamina C, 500 mg", "Genfar", 800, 10);
+        assertTrue(farmacia.agregarOrden("1010", "EPS1", "Vitamina C, 500 mg", "2").exito());
+        assertTrue(new Farmacia(datos, RELOJ).listarOrdenes().contains("Vitamina C, 500 mg x 2"));
+        assertTrue(farmacia.registrarFuncionario("777", "cla,ve", "Ruiz, Ana", "ana@mail.com").exito());
+        assertEquals(new Resultado(true, "Ruiz, Ana"), farmacia.iniciarSesion("777", "cla,ve"));
+    }
+
+    @Test
     void formatoDePesos() {
         assertEquals("$0", Farmacia.pesos(0));
         assertEquals("$1.500", Farmacia.pesos(1500));

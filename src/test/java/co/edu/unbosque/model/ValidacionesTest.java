@@ -100,8 +100,6 @@ class ValidacionesTest {
     @CsvSource({
             "'', EPS1, Paracetamol, 1, Todos los campos son obligatorios.",
             "1010, EPS1, Paracetamol, '', Todos los campos son obligatorios.",
-            "'10,10', EPS1, Paracetamol, 1, Los datos no pueden contener comas.",
-            "1010, EPS1, 'Para,cetamol', 1, Los datos no pueden contener comas.",
             "1010, EPS1, Paracetamol, x, La cantidad debe ser un número entero.",
             "1010, EPS1, Paracetamol, 1.5, La cantidad debe ser un número entero.",
             "1010, EPS1, Paracetamol, 0, La cantidad debe ser mayor que cero.",
@@ -131,8 +129,6 @@ class ValidacionesTest {
             "777, '', Ana, ana@mail.com, Todos los campos son obligatorios.",
             "777, clave, '  ', ana@mail.com, Todos los campos son obligatorios.",
             "777, clave, Ana, '', Todos los campos son obligatorios.",
-            "777, clave, 'Ruiz, Ana', ana@mail.com, Los datos no pueden contener comas.",
-            "777, 'cla,ve', Ana, ana@mail.com, Los datos no pueden contener comas.",
             "777, clave, Ana, malo, Ingrese un correo válido.",
             "777, clave, Ana, ana@mail, Ingrese un correo válido.",
             "777, clave, Ana, 'ana @mail.com', Ingrese un correo válido.",
