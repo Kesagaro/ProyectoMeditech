@@ -1,10 +1,18 @@
 package co.edu.unbosque.view;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.FlowLayout;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 public class PanelMenu extends JPanel {
-	private TransparentPanel glassPanel;
 	private PersonalButton inventarioButton;
 	private PersonalButton turnoButton;
 	private PersonalButton funcionariosButton;
@@ -14,53 +22,49 @@ public class PanelMenu extends JPanel {
 	private JLabel sesionLabel;
 
 	public PanelMenu() {
-		setLayout(null);
+		super(new BorderLayout());
+		atrasButton = new PersonalButton("Cerrar sesión", false);
+		sesionLabel = new JLabel("");
+		sesionLabel.setFont(Tema.fuente(Font.BOLD, 1));
+		sesionLabel.setForeground(Color.WHITE);
+		add(Tema.encabezado(atrasButton, "Menú principal", sesionLabel), BorderLayout.NORTH);
 
-		glassPanel = new TransparentPanel();
-		glassPanel.setLayout(null);
-		glassPanel.setBounds(70, 50, 400, 300);
+		turnoButton = opcion("Turnos", "Asignar turno a un paciente");
+		inventarioButton = opcion("Inventario", "Agregar, editar y eliminar");
+		mediButton = opcion("Medicina", "Buscar precio y stock");
+		funcionariosButton = opcion("Funcionarios", "Ver y eliminar cuentas");
+		reporButton = opcion("Reportes", "Órdenes y top de ventas");
 
-		sesionLabel = new JLabel("", SwingConstants.CENTER);
-		sesionLabel.setFont(new Font("Arial", Font.BOLD, 16));
-		sesionLabel.setBounds(15, 20, 370, 30);
-		glassPanel.add(sesionLabel);
+		// tres opciones arriba y dos centradas abajo
+		TransparentPanel tarjeta = new TransparentPanel();
+		tarjeta.setLayout(new BoxLayout(tarjeta, BoxLayout.Y_AXIS));
+		tarjeta.add(fila(turnoButton, inventarioButton, mediButton));
+		tarjeta.add(Box.createVerticalStrut(16));
+		tarjeta.add(fila(funcionariosButton, reporButton));
+		add(Tema.centrado(tarjeta, 720), BorderLayout.CENTER);
+	}
 
-		inventarioButton = new PersonalButton("Inventario");
-		inventarioButton.setBounds(15, 125, 180, 36);
-		glassPanel.add(inventarioButton);
+	private static JPanel fila(PersonalButton... botones) {
+		JPanel fila = new JPanel(new FlowLayout(FlowLayout.CENTER, 16, 0));
+		fila.setOpaque(false);
+		for (PersonalButton boton : botones) {
+			fila.add(boton);
+		}
+		return fila;
+	}
 
-		turnoButton = new PersonalButton("Turno");
-		turnoButton.setBounds(110, 75, 180, 36);
-		glassPanel.add(turnoButton);
-
-		funcionariosButton = new PersonalButton("Funcionarios");
-		funcionariosButton.setBounds(205, 125, 180, 36);
-		glassPanel.add(funcionariosButton);
-
-		mediButton = new PersonalButton("Medicina");
-		mediButton.setBounds(15, 175, 180, 36);
-		glassPanel.add(mediButton);
-
-		atrasButton = new PersonalButton("Atrás");
-		atrasButton.setBounds(5, 5, 100, 40);
-		add(atrasButton);
-
-		reporButton = new PersonalButton("Reportes");
-		reporButton.setBounds(205, 175, 180, 36);
-		glassPanel.add(reporButton);
-
-		add(glassPanel);
+	/** Botón grande del menú con un título y una descripción corta. */
+	private static PersonalButton opcion(String titulo, String descripcion) {
+		PersonalButton boton = new PersonalButton("<html><center><span style='font-size:13pt'>" + titulo
+				+ "</span><br><span style='font-size:9pt;font-weight:normal'>" + descripcion + "</span></center></html>");
+		boton.setPreferredSize(new Dimension(200, 92));
+		return boton;
 	}
 
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		Graphics2D g2d = (Graphics2D) g;
-
-		GradientPaint gradient = new GradientPaint(0, 0, new Color(107, 142, 78), 0, getHeight(),
-				new Color(178, 197, 178));
-		g2d.setPaint(gradient);
-		g2d.fillRect(0, 0, getWidth(), getHeight());
+		Tema.pintarFondo(g, this);
 	}
 
 	/** Muestra quién inició sesión; con {@code null} se borra al cerrar la sesión. */

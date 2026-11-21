@@ -1,25 +1,23 @@
 package co.edu.unbosque.view;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GradientPaint;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import javax.swing.JLabel;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class PanelInventario extends JPanel {
-
-	private TransparentPanel glassPanel;
 	private PersonalButton actualizarButton;
 	private PersonalButton agregarButton;
 	private PersonalButton atrasButton;
 	private PersonalButton eliminarButton;
-	private PersonalButton listarButton;
-	private JTextArea areaMedicamentos;
+	private PersonalButton limpiarButton;
+	private Tabla tabla;
 
 	private JTextField idField;
 	private JTextField nombreField;
@@ -27,104 +25,99 @@ public class PanelInventario extends JPanel {
 	private JTextField precioField;
 	private JTextField cantidadField;
 
-	private JLabel idLabel;
-	private JLabel nombreLabel;
-	private JLabel empresaLabel;
-	private JLabel precioLabel;
-	private JLabel cantidadLabel;
-
 	public PanelInventario() {
-		setLayout(null);
+		super(new BorderLayout());
+		atrasButton = new PersonalButton("Atrás", false);
+		add(Tema.encabezado(atrasButton, "Inventario", null), BorderLayout.NORTH);
 
-		glassPanel = new TransparentPanel();
-		glassPanel.setLayout(null);
-		glassPanel.setBounds(25, 50, 485, 390);
+		// formulario a la izquierda
+		TransparentPanel formulario = new TransparentPanel();
+		formulario.setLayout(new GridBagLayout());
+		idField = new JTextField(12);
+		nombreField = new JTextField(12);
+		empresaField = new JTextField(12);
+		precioField = new JTextField(12);
+		cantidadField = new JTextField(12);
+		Tema.filaFormulario(formulario, 0, "ID", idField);
+		Tema.filaFormulario(formulario, 1, "Nombre", nombreField);
+		Tema.filaFormulario(formulario, 2, "Empresa", empresaField);
+		Tema.filaFormulario(formulario, 3, "Precio", precioField);
+		Tema.filaFormulario(formulario, 4, "Cantidad", cantidadField);
 
-		// etiqueta y campo ID
-		idLabel = new JLabel("Número ID:");
-		idLabel.setBounds(50, 20, 80, 25);
-		glassPanel.add(idLabel);
-		idField = new JTextField(15);
-		idField.setBounds(140, 20, 120, 25);
-		glassPanel.add(idField);
+		agregarButton = new PersonalButton("Agregar");
+		actualizarButton = new PersonalButton("Actualizar");
+		eliminarButton = new PersonalButton("Eliminar", false);
+		limpiarButton = new PersonalButton("Limpiar", false);
+		JPanel botones = new JPanel(new GridLayout(2, 2, 8, 8));
+		botones.setOpaque(false);
+		botones.add(agregarButton);
+		botones.add(actualizarButton);
+		botones.add(eliminarButton);
+		botones.add(limpiarButton);
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridy = 5;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(14, 0, 0, 0);
+		formulario.add(botones, c);
+		c.gridy = 6;
+		c.weighty = 1; // empuja el formulario hacia arriba
+		formulario.add(javax.swing.Box.createVerticalGlue(), c);
+		formulario.setPreferredSize(new Dimension(290, formulario.getPreferredSize().height));
+		limpiarButton.addActionListener(e -> limpiar());
 
-		// etiqueta y campo nombre medicamento
-		nombreLabel = new JLabel("Nombre:");
-		nombreLabel.setBounds(50, 50, 80, 25);
-		glassPanel.add(nombreLabel);
-		nombreField = new JTextField(15);
-		nombreField.setBounds(140, 50, 120, 25);
-		glassPanel.add(nombreField);
+		// tabla a la derecha; al elegir una fila se copia al formulario para editarla
+		tabla = new Tabla(new String[] {"ID", "Nombre", "Empresa", "Precio", "Stock"},
+				new Class<?>[] {Long.class, String.class, String.class, Double.class, Integer.class});
+		tabla.setMensajeVacio("No hay medicamentos registrados.");
+		tabla.anchos(55, 190, 130, 85, 65);
+		tabla.getTabla().getSelectionModel().addListSelectionListener(e -> {
+			if (!e.getValueIsAdjusting() && tabla.valorSeleccionado(0) != null) {
+				copiarSeleccion();
+			}
+		});
+		TransparentPanel listado = new TransparentPanel();
+		listado.setLayout(new BorderLayout());
+		listado.add(tabla);
 
-		// etiqueta y campo empresa
-		empresaLabel = new JLabel("Empresa:");
-		empresaLabel.setBounds(50, 80, 80, 25);
-		glassPanel.add(empresaLabel);
-		empresaField = new JTextField(15);
-		empresaField.setBounds(140, 80, 120, 25);
-		glassPanel.add(empresaField);
-
-		// etiqueta y campo precio
-		precioLabel = new JLabel("Precio:");
-		precioLabel.setBounds(50, 110, 80, 25);
-		glassPanel.add(precioLabel);
-		precioField = new JTextField(15);
-		precioField.setBounds(140, 110, 120, 25);
-		glassPanel.add(precioField);
-
-		// etiqueta y campo cantidad
-		cantidadLabel = new JLabel("Cantidad:");
-		cantidadLabel.setBounds(50, 140, 80, 25);
-		glassPanel.add(cantidadLabel);
-		cantidadField = new JTextField(15);
-		cantidadField.setBounds(140, 140, 120, 25);
-		glassPanel.add(cantidadField);
-
-		// Botones
-		atrasButton = new PersonalButton("Atrás");
-		atrasButton.setBounds(5, 5, 100, 40);
-		add(atrasButton);
-
-		agregarButton = boton("Agregar", 15);
-		actualizarButton = boton("Actualizar", 130);
-		eliminarButton = boton("Eliminar", 245);
-		listarButton = boton("Listar", 360);
-
-		areaMedicamentos = new JTextArea();
-		areaMedicamentos.setEditable(false);
-		JScrollPane scrollPane = new JScrollPane(areaMedicamentos);
-		scrollPane.setBounds(15, 220, 455, 155);
-		glassPanel.add(scrollPane);
-
-		add(glassPanel);
+		JPanel centro = new JPanel(new BorderLayout(16, 0));
+		centro.setOpaque(false);
+		centro.add(formulario, BorderLayout.WEST);
+		centro.add(listado, BorderLayout.CENTER);
+		add(Tema.contenido(centro), BorderLayout.CENTER);
 	}
 
-	private PersonalButton boton(String texto, int x) {
-		PersonalButton boton = new PersonalButton(texto);
-		boton.setFont(new Font("Garlic", Font.BOLD, 14));
-		boton.setBounds(x, 175, 110, 32);
-		glassPanel.add(boton);
-		return boton;
+	private void copiarSeleccion() {
+		idField.setText(String.valueOf(tabla.valorSeleccionado(0)));
+		nombreField.setText((String) tabla.valorSeleccionado(1));
+		empresaField.setText((String) tabla.valorSeleccionado(2));
+		double precio = (Double) tabla.valorSeleccionado(3);
+		precioField.setText(precio == Math.rint(precio) ? String.valueOf((long) precio) : String.valueOf(precio));
+		cantidadField.setText(String.valueOf(tabla.valorSeleccionado(4)));
 	}
 
+	/** Vacía el formulario y quita la selección de la tabla. */
+	public void limpiar() {
+		tabla.getTabla().clearSelection();
+		for (JTextField campo : new JTextField[] {idField, nombreField, empresaField, precioField, cantidadField}) {
+			campo.setText("");
+		}
+	}
+
+	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		Graphics2D g2d = (Graphics2D) g;
-
-		GradientPaint gradient = new GradientPaint(0, 0, new Color(107, 142, 78), 0, getHeight(),
-				new Color(178, 197, 178));
-		g2d.setPaint(gradient);
-		g2d.fillRect(0, 0, getWidth(), getHeight());
+		Tema.pintarFondo(g, this);
 	}
 
 	public PersonalButton getActualizarButton() {
 		return actualizarButton;
 	}
-	
+
 	public PersonalButton getAgregarButton() {
 		return agregarButton;
 	}
-	
+
 	public PersonalButton getAtrasButton() {
 		return atrasButton;
 	}
@@ -133,52 +126,31 @@ public class PanelInventario extends JPanel {
 		return eliminarButton;
 	}
 
-	public PersonalButton getListarButton() {
-		return listarButton;
+	public PersonalButton getLimpiarButton() {
+		return limpiarButton;
 	}
 
-	public JTextArea getAreaMedicamentos() {
-		return areaMedicamentos;
+	public Tabla getTabla() {
+		return tabla;
 	}
 
 	public JTextField getIdField() {
 		return idField;
 	}
 
-	public void setIdField(JTextField idField) {
-		this.idField = idField;
-	}
-
 	public JTextField getNombreField() {
 		return nombreField;
-	}
-
-	public void setNombreField(JTextField nombreField) {
-		this.nombreField = nombreField;
 	}
 
 	public JTextField getEmpresaField() {
 		return empresaField;
 	}
 
-	public void setEmpresaField(JTextField empresaField) {
-		this.empresaField = empresaField;
-	}
-
 	public JTextField getPrecioField() {
 		return precioField;
-	}
-
-	public void setPrecioField(JTextField precioField) {
-		this.precioField = precioField;
 	}
 
 	public JTextField getCantidadField() {
 		return cantidadField;
 	}
-
-	public void setCantidadField(JTextField cantidadField) {
-		this.cantidadField = cantidadField;
-	}
-
 }

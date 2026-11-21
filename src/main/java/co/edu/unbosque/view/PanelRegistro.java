@@ -1,88 +1,57 @@
 package co.edu.unbosque.view;
 
-import java.awt.Color;
-import java.awt.GradientPaint;
+import java.awt.BorderLayout;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-
 public class PanelRegistro extends JPanel {
-
 	private JTextField cedulaField;
 	private JTextField nombreField;
 	private JTextField correoField;
 	private JPasswordField passwordField;
 	private PersonalButton RegistroButton;
 	private PersonalButton atrasButton;
-	private TransparentPanel glassPanel;
-	private JLabel cedulaLabel;
-	private JLabel nombreLabel;
-	private JLabel correoLabel;
-	
+
 	public PanelRegistro() {
-		setLayout(null);
+		super(new BorderLayout());
+		atrasButton = new PersonalButton("Atrás", false);
+		add(Tema.encabezado(atrasButton, "Registrar funcionario", null), BorderLayout.NORTH);
 
-		glassPanel = new TransparentPanel();
-        glassPanel.setLayout(null); 
-        glassPanel.setBounds(100, 50, 300, 300);
-       
-        
-      
-        cedulaLabel = new JLabel("Cédula:");
-        cedulaLabel.setBounds(50, 20, 80, 25); 
-        glassPanel.add(cedulaLabel);
-        cedulaField = new JTextField(15);
-        cedulaField.setBounds(140, 20, 120, 25); 
-        glassPanel.add(cedulaField);
-        
- 
-        JLabel passwordLabel = new JLabel("Contraseña:");
-        passwordLabel.setBounds(50, 50, 80, 25); 
-        glassPanel.add(passwordLabel);
-        passwordField = new JPasswordField(15);
-        passwordField.setBounds(140, 50, 120, 25); 
-        glassPanel.add(passwordField);
-        
-    
-        nombreLabel = new JLabel ("Nombre:");
-        nombreLabel.setBounds(50, 80, 80, 25);
-        glassPanel.add(nombreLabel);
-        nombreField = new JTextField(15);
-        nombreField.setBounds(140, 80, 120, 25);
-        glassPanel.add(nombreField);
-        
-       
-        
-        correoLabel = new JLabel ("Correo:");
-        correoLabel.setBounds(50, 110, 80, 25);
-        glassPanel.add(correoLabel);
-        correoField = new JTextField(15);
-        correoField.setBounds(140, 110, 120, 25);
-        glassPanel.add(correoField);
+		TransparentPanel tarjeta = new TransparentPanel();
+		tarjeta.setLayout(new GridBagLayout());
+		cedulaField = new JTextField(18);
+		passwordField = new JPasswordField(18);
+		passwordField.putClientProperty("JComponent.showRevealButton", true);
+		nombreField = new JTextField(18);
+		correoField = new JTextField(18);
+		correoField.putClientProperty("JTextField.placeholderText", "nombre@correo.com");
+		Tema.filaFormulario(tarjeta, 0, "Cédula", cedulaField);
+		Tema.filaFormulario(tarjeta, 1, "Contraseña", passwordField);
+		Tema.filaFormulario(tarjeta, 2, "Nombre", nombreField);
+		Tema.filaFormulario(tarjeta, 3, "Correo", correoField);
 
-        RegistroButton = new PersonalButton("Registrar");
-        RegistroButton.setBounds(75, 140, 150, 40); 
-        glassPanel.add(RegistroButton);
+		RegistroButton = new PersonalButton("Registrar");
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridy = 4;
+		c.gridwidth = 2;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(16, 0, 0, 0);
+		tarjeta.add(RegistroButton, c);
 
-        atrasButton = new PersonalButton("Atrás");
-        atrasButton.setBounds(75, 190, 150, 40); 
-        glassPanel.add(atrasButton);
-
-        add(glassPanel);
+		add(Tema.centrado(tarjeta, 420), BorderLayout.CENTER);
 	}
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
 
-        GradientPaint gradient = new GradientPaint(0, 0, new Color(107, 142, 78), 0, getHeight(), new Color(178, 197, 178));
-        g2d.setPaint(gradient);
-        g2d.fillRect(0, 0, getWidth(), getHeight());
-    }
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		Tema.pintarFondo(g, this);
+	}
 
 	public PersonalButton getRegistroButton() {
 		return RegistroButton;

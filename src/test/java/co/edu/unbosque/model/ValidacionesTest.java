@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,7 +66,7 @@ class ValidacionesTest {
         Resultado agregado = farmacia.guardarMedicamento(" 1 ", " Paracetamol ", "Genfar", "1500", "20", false);
         assertTrue(agregado.exito());
         assertEquals("Medicamento agregado con éxito.", agregado.mensaje());
-        assertTrue(farmacia.buscarMedicamentos("Paracetamol").mensaje().startsWith("ID 1 | Paracetamol | Genfar"),
+        assertEquals("[1, Paracetamol, Genfar, 1500.0, 20]", Arrays.toString(farmacia.filasMedicamentos().get(0)),
                 "los espacios alrededor de los datos se recortan");
 
         error("Ya existe un medicamento con el ID 1.",
@@ -90,8 +92,17 @@ class ValidacionesTest {
     @Test
     void buscarSinTextoSeRechaza() {
         error("Ingrese el nombre del medicamento a buscar.", farmacia.buscarMedicamentos(" "));
-        assertEquals(new Resultado(true, "No se encontraron medicamentos con \"xyz\"."),
-                farmacia.buscarMedicamentos(" xyz "));
+        error("No se encontraron medicamentos con \"xyz\".", farmacia.buscarMedicamentos(" xyz "));
+        assertEquals(List.of(), farmacia.filasBusqueda(" "));
+    }
+
+    @Test
+    void buscarCuentaLosResultados() {
+        farmacia.guardarMedicamento("1", "Paracetamol", "Genfar", "1500", "20", false);
+        farmacia.guardarMedicamento("2", "Paracetamol forte", "MK", "2500", "5", false);
+        assertEquals(new Resultado(true, "2 medicamentos encontrados."), farmacia.buscarMedicamentos(" para "));
+        assertEquals(new Resultado(true, "1 medicamento encontrado."), farmacia.buscarMedicamentos("forte"));
+        assertEquals(2L, farmacia.filasBusqueda(" para ").get(1)[0]);
     }
 
     // ---------------------------------------------------------------- órdenes
@@ -108,7 +119,7 @@ class ValidacionesTest {
     void ordenInvalida(String documento, String entidad, String medicamento, String cantidad, String mensaje) {
         farmacia.guardarMedicamento("1", "Paracetamol", "Genfar", "1500", "20", false);
         error(mensaje, farmacia.agregarOrden(documento, entidad, medicamento, cantidad));
-        assertEquals("No hay órdenes registradas.", farmacia.listarOrdenes(), "no debe guardarse la orden");
+        assertEquals(List.of(), farmacia.filasOrdenes(), "no debe guardarse la orden");
     }
 
     @Test
@@ -135,14 +146,15 @@ class ValidacionesTest {
     })
     void registroInvalido(String cedula, String password, String nombre, String correo, String mensaje) {
         error(mensaje, farmacia.registrarFuncionario(cedula, password, nombre, correo));
-        assertEquals("", farmacia.listarUsuarios(), "no debe guardarse el funcionario");
+        assertEquals(List.of(), farmacia.filasFuncionarios(), "no debe guardarse el funcionario");
     }
 
     @Test
     void registroEInicioDeSesion() {
         assertEquals(new Resultado(true, "Usuario registrado con éxito."),
                 farmacia.registrarFuncionario(" 777 ", "clave", " Ana Ruiz ", " ana@mail.com "));
-        assertEquals("Cédula: 777 | Nombre: Ana Ruiz | Correo: ana@mail.com\n", farmacia.listarUsuarios());
+        assertEquals("[777, Ana Ruiz, ana@mail.com]", Arrays.toString(farmacia.filasFuncionarios().get(0)),
+                "sin la contraseña");
         error("Ya existe un funcionario registrado con esa cédula.",
                 farmacia.registrarFuncionario("777", "otra", "Otro", "o@mail.com"));
 

@@ -1,62 +1,50 @@
 package co.edu.unbosque.view;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.GridLayout;
+
+import javax.swing.JPanel;
 
 public class PanelReport extends JPanel {
-    private JLabel titleLabel;
-    private  PersonalButton atrasButton;
-    private  PersonalButton top5Button;
-    private  PersonalButton ordenesButton;
-    private TransparentPanel glassPanel;
+    private PersonalButton atrasButton;
+    private PersonalButton top5Button;
+    private PersonalButton ordenesButton;
 
     public PanelReport() {
-        setLayout(null); 
-        
+        super(new BorderLayout());
+        atrasButton = new PersonalButton("Atrás", false);
+        add(Tema.encabezado(atrasButton, "Reportes", null), BorderLayout.NORTH);
 
-		glassPanel = new TransparentPanel();
-        glassPanel.setLayout(null); 
-        glassPanel.setBounds(100, 50, 300, 300);
-       
-        top5Button = new PersonalButton(" Top ventas ");
-        top5Button.setBounds(60, 100, 180, 30); 
-        glassPanel.add(top5Button);
-        
-        ordenesButton = new PersonalButton("Órdenes");
-        ordenesButton.setBounds(60, 150, 180, 30); 
-        glassPanel.add(ordenesButton);
-        
-
-        atrasButton = new PersonalButton("Atrás");
-		atrasButton.setBounds(5, 5, 100, 40);
-		add(atrasButton);
-        
-        add(glassPanel);
-        
-      
+        top5Button = new PersonalButton("<html><center><span style='font-size:13pt'>Top ventas</span><br>"
+                + "<span style='font-size:9pt;font-weight:normal'>Los 5 medicamentos más vendidos</span></center></html>");
+        ordenesButton = new PersonalButton("<html><center><span style='font-size:13pt'>Órdenes</span><br>"
+                + "<span style='font-size:9pt;font-weight:normal'>Registrar y consultar órdenes</span></center></html>");
+        TransparentPanel tarjeta = new TransparentPanel();
+        tarjeta.setLayout(new GridLayout(1, 2, 16, 16));
+        for (PersonalButton boton : new PersonalButton[] {top5Button, ordenesButton}) {
+            boton.setPreferredSize(new Dimension(220, 92));
+            tarjeta.add(boton);
+        }
+        add(Tema.centrado(tarjeta, 520), BorderLayout.CENTER);
     }
+
+    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
-
-        GradientPaint gradient = new GradientPaint(0, 0, new Color(107, 142, 78), 0, getHeight(), new Color(178, 197, 178));
-        g2d.setPaint(gradient);
-        g2d.fillRect(0, 0, getWidth(), getHeight());
+        Tema.pintarFondo(g, this);
     }
-    
 
     public PersonalButton getAtrasButton() {
-        return  atrasButton;
+        return atrasButton;
     }
 
+    public PersonalButton getOrdenesButton() {
+        return ordenesButton;
+    }
 
-	public PersonalButton getOrdenesButton() {
-		
-		return ordenesButton;
-	}
-
-	public PersonalButton getTop5Button() {
-		
-		return top5Button;
-	}
+    public PersonalButton getTop5Button() {
+        return top5Button;
+    }
 }

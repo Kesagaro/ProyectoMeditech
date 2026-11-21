@@ -7,7 +7,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -69,8 +71,7 @@ public class FuncionariosDAO {
 
     /** Nombre del funcionario, o {@code null} si no existe o es una cuenta antigua sin nombre. */
     public String buscarNombre(String cedula) {
-        String nombre = consultar("SELECT nombre FROM funcionarios WHERE cedula = ?", cedula);
-        return nombre == null || nombre.isBlank() ? null : nombre;
+        return vacioANulo(consultar("SELECT nombre FROM funcionarios WHERE cedula = ?", cedula));
     }
 
     public boolean existeCedula(String cedula) {
@@ -87,23 +88,25 @@ public class FuncionariosDAO {
         }
     }
 
-    public String mostrarUsuarios() {
-        StringBuilder usuarios = new StringBuilder();
-        // nunca se consulta ni se muestra la contraseña
+    /**
+     * Funcionarios en el orden en que se registraron. La contraseña nunca se consulta: los
+     * objetos devueltos la tienen en {@code null}. Las cuentas antiguas sin nombre ni correo
+     * los traen en {@code null}.
+     */
+    public List<FuncionarioDTO> listar() {
+        List<FuncionarioDTO> funcionarios = new ArrayList<>();
         try (Connection conexion = bd.conectar();
                 PreparedStatement sql = conexion.prepareStatement(
                         "SELECT cedula, nombre, correo FROM funcionarios ORDER BY rowid");
                 ResultSet filas = sql.executeQuery()) {
             while (filas.next()) {
-                usuarios.append("Cédula: ").append(filas.getString("cedula"))
-                        .append(" | Nombre: ").append(guion(filas.getString("nombre")))
-                        .append(" | Correo: ").append(guion(filas.getString("correo")))
-                        .append("\n");
+                funcionarios.add(new FuncionarioDTO(filas.getString("cedula"), null,
+                        vacioANulo(filas.getString("nombre")), vacioANulo(filas.getString("correo"))));
             }
         } catch (SQLException e) {
             throw new ErrorDeDatos("No se pudieron leer los funcionarios", e);
         }
-        return usuarios.toString();
+        return funcionarios;
     }
 
     /** Primera columna de la primera fila, o {@code null} si no hay filas. */
@@ -118,8 +121,8 @@ public class FuncionariosDAO {
         }
     }
 
-    private static String guion(String texto) {
-        return texto == null || texto.isBlank() ? "-" : texto;
+    private static String vacioANulo(String texto) {
+        return texto == null || texto.isBlank() ? null : texto;
     }
 
     private static String hashear(String password) {

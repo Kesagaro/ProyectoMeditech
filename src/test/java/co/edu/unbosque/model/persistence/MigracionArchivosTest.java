@@ -85,7 +85,9 @@ class MigracionArchivosTest {
 
         BaseDeDatos bd = new BaseDeDatos(datos);
 
-        assertEquals("Cédula: 900 | Nombre: Viejo | Correo: v@x.co\n", new FuncionariosDAO(bd).mostrarUsuarios());
+        List<FuncionarioDTO> funcionarios = new FuncionariosDAO(bd).listar();
+        assertEquals(1, funcionarios.size());
+        assertEquals("FuncionarioDTO[cedula=900, nombre=Viejo, correo=v@x.co]", funcionarios.get(0).toString());
         List<OrdenDTO> ordenes = new OrdenDAO(bd).listarOrdenes();
         assertEquals(2, ordenes.size());
         assertEquals("Paracetamol", ordenes.get(0).getNombreMedicamento());
@@ -117,7 +119,7 @@ class MigracionArchivosTest {
     void sinArchivosAntiguosLaBaseEmpiezaVacia() {
         BaseDeDatos bd = new BaseDeDatos(datos);
         assertTrue(new File(datos, BaseDeDatos.ARCHIVO).exists());
-        assertEquals("", new FuncionariosDAO(bd).mostrarUsuarios());
+        assertEquals(List.of(), new FuncionariosDAO(bd).listar());
         assertFalse(new MedicamentoDAO(bd).existeId(1));
         assertEquals(0, new OrdenDAO(bd).listarOrdenes().size());
     }

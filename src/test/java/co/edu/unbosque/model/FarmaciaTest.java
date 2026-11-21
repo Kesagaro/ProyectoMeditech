@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.List;
 
 import co.edu.unbosque.model.persistence.BaseDeDatos;
 
@@ -46,15 +48,15 @@ class FarmaciaTest {
     void rechazaOrdenDeMedicamentoInexistente() {
         assertEquals("No existe el medicamento \"Amoxicilina\" en el inventario.",
                 farmacia.agregarOrden("1010", "EPS1", "Amoxicilina", 1));
-        assertEquals("No hay órdenes registradas.", farmacia.listarOrdenes());
+        assertEquals(List.of(), farmacia.filasOrdenes());
     }
 
     @Test
     void rechazaOrdenSinStockSuficiente() {
         assertEquals("Stock insuficiente: quedan 5 unidades de Ibuprofeno.",
                 farmacia.agregarOrden("1010", "EPS1", "Ibuprofeno", 6));
-        assertTrue(farmacia.buscarMedicamentos("Ibuprofeno").mensaje().contains("Stock: 5"));
-        assertEquals("No hay órdenes registradas.", farmacia.listarOrdenes());
+        assertEquals(List.of("[2, Ibuprofeno, MK, 2000.0, 5]"), texto(farmacia.filasBusqueda("Ibuprofeno")));
+        assertEquals(List.of(), farmacia.filasOrdenes());
     }
 
     @Test
@@ -63,9 +65,20 @@ class FarmaciaTest {
                 farmacia.agregarOrden("1010", "EPS1", "Ibuprofeno", 5));
 
         Farmacia reabierta = new Farmacia(datos, RELOJ);
-        assertTrue(reabierta.buscarMedicamentos("Ibuprofeno").mensaje().contains("Stock: 0"));
-        assertEquals("19/11/2026 14:30 | Documento: 1010 | Entidad: EPS1 | Ibuprofeno x 5 | Total: $10.000\n",
-                reabierta.listarOrdenes());
+        assertEquals(List.of("[2, Ibuprofeno, MK, 2000.0, 0]"), texto(reabierta.filasBusqueda("Ibuprofeno")));
+        assertEquals(List.of("[2026-11-19T14:30, 1010, EPS1, Ibuprofeno, 5, 10000.0]"), texto(reabierta.filasOrdenes()));
+    }
+
+    @Test
+    void elInventarioSeListaOrdenadoPorId() {
+        farmacia.agregarMedicamento(0, "Aspirina", "Bayer", 800.5f, 3);
+        assertEquals(List.of("[0, Aspirina, Bayer, 800.5, 3]", "[1, Paracetamol, Genfar, 1500.0, 20]",
+                "[2, Ibuprofeno, MK, 2000.0, 5]"), texto(farmacia.filasMedicamentos()));
+    }
+
+    /** Cada fila como texto, para comparar tablas completas en una línea. */
+    private static List<String> texto(List<Object[]> filas) {
+        return filas.stream().map(Arrays::toString).toList();
     }
 
     @Test
@@ -86,15 +99,15 @@ class FarmaciaTest {
     @Test
     void lasOrdenesAntiguasSeListanSinFechaNiTotal(@TempDir File antigua) throws Exception {
         Files.writeString(Path.of(antigua.getPath(), "ordenes.txt"), "1010,EPS1,Paracetamol,3\n");
-        assertEquals("Sin fecha | Documento: 1010 | Entidad: EPS1 | Paracetamol x 3 | Total: -\n",
-                new Farmacia(antigua, RELOJ).listarOrdenes());
+        assertEquals(List.of("[null, 1010, EPS1, Paracetamol, 3, null]"),
+                texto(new Farmacia(antigua, RELOJ).filasOrdenes()));
     }
 
     @Test
     void aceptaComasEnLosDatos() {
         farmacia.agregarMedicamento(3, "Vitamina C, 500 mg", "Genfar", 800, 10);
         assertTrue(farmacia.agregarOrden("1010", "EPS1", "Vitamina C, 500 mg", "2").exito());
-        assertTrue(new Farmacia(datos, RELOJ).listarOrdenes().contains("Vitamina C, 500 mg x 2"));
+        assertEquals("Vitamina C, 500 mg", new Farmacia(datos, RELOJ).filasOrdenes().get(0)[3]);
         assertTrue(farmacia.registrarFuncionario("777", "cla,ve", "Ruiz, Ana", "ana@mail.com").exito());
         assertEquals(new Resultado(true, "Ruiz, Ana"), farmacia.iniciarSesion("777", "cla,ve"));
     }
@@ -108,7 +121,7 @@ class FarmaciaTest {
 
     @Test
     void top5SinOrdenes() {
-        assertEquals("Aún no hay órdenes registradas.", farmacia.top5Medicamentos());
+        assertEquals(List.of(), farmacia.filasTop5());
     }
 
     @Test
@@ -116,9 +129,7 @@ class FarmaciaTest {
         farmacia.agregarOrden("1", "E", "Ibuprofeno", 4);
         farmacia.agregarOrden("2", "E", "Paracetamol", 3);
         farmacia.agregarOrden("3", "E", "Paracetamol", 2);
-        assertEquals("Top 5 medicamentos más expendidos:\n\n"
-                + "1. Paracetamol - Cantidad expendida: 5\n"
-                + "2. Ibuprofeno - Cantidad expendida: 4\n", farmacia.top5Medicamentos());
+        assertEquals(List.of("[1, Paracetamol, 5]", "[2, Ibuprofeno, 4]"), texto(farmacia.filasTop5()));
     }
 
     @Test
@@ -127,9 +138,9 @@ class FarmaciaTest {
             farmacia.agregarMedicamento(id, "Med" + id, "X", 1, 100);
             farmacia.agregarOrden("1", "E", "Med" + id, id);
         }
-        String reporte = farmacia.top5Medicamentos();
-        assertTrue(reporte.contains("1. Med8 - Cantidad expendida: 8"));
-        assertTrue(reporte.contains("5. Med4 - Cantidad expendida: 4"));
-        assertFalse(reporte.contains("Med3"));
+        List<String> ranking = texto(farmacia.filasTop5());
+        assertEquals(5, ranking.size());
+        assertEquals("[1, Med8, 8]", ranking.get(0));
+        assertEquals("[5, Med4, 4]", ranking.get(4));
     }
 }

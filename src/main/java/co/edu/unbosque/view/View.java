@@ -20,7 +20,12 @@ public class View extends JFrame {
 
     public View() {
         setTitle("BosqueFarma");
-        setSize(550, 500);
+        setSize(960, 640);
+        setMinimumSize(new Dimension(860, 580));
+        java.net.URL logo = getClass().getResource("/BosqueFarma.png");
+        if (logo != null) {
+            setIconImage(new ImageIcon(logo).getImage());
+        }
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
