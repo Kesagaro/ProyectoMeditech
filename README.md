@@ -44,7 +44,7 @@ Capturas tomadas de la aplicación con datos de ejemplo.
 
 - Java 17+ (probado con JDK 17, 21 y 25)
 - Swing (CardLayout, componentes personalizados)
-- Persistencia en archivos: texto plano y serialización Java
+- SQLite con JDBC (base incrustada en un archivo, sin servidor que instalar)
 - Maven (con Maven Wrapper) y JUnit 5
 - GitHub Actions: compila y ejecuta las pruebas en cada push y pull request
 
@@ -75,7 +75,7 @@ Al subir un tag con la versión de `pom.xml` (por ejemplo `v1.0.0`), GitHub Acti
 
 ## Pruebas
 
-Las pruebas JUnit 5 están en `src/test/java` y cubren los turnos, las reglas de órdenes, stock y Top 5, y la persistencia de funcionarios (hash de contraseñas y migración), medicamentos y órdenes. Cada prueba trabaja en una carpeta temporal, sin tocar `data/`.
+Las pruebas JUnit 5 están en `src/test/java` y cubren los turnos, las reglas de órdenes, stock y Top 5, y la persistencia de funcionarios (hash de contraseñas), medicamentos, órdenes (venta y descuento de stock en una transacción) y la importación de los archivos de versiones anteriores. Cada prueba usa una base en una carpeta temporal, sin tocar `data/`.
 
 ```bash
 ./mvnw test
@@ -89,7 +89,7 @@ En VS Code también aparecen en la vista **Testing** (ícono del matraz). GitHub
 src/main/java/co/edu/unbosque/
 ├── controller/          Main (punto de entrada) y Controller (eventos vista → modelo)
 ├── model/               Farmacia (fachada y reglas de negocio), Resultado y Turnos
-│   └── persistence/     DAO y DTO de funcionarios, medicamentos y órdenes; interfaz Crud<T>
+│   └── persistence/     BaseDeDatos (SQLite), DAO y DTO de funcionarios, medicamentos, órdenes y turnos; importación de archivos antiguos
 └── view/                View (JFrame + CardLayout) y un panel por pantalla
 
 src/main/resources/            Logo de la aplicación
@@ -104,12 +104,16 @@ Modelo editable en Astah: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/Bos
 
 ### Persistencia
 
-| Archivo | Formato | Contenido |
+Los datos se guardan en una base **SQLite** en `data/bosquefarma.db`. SQLite va incluido en el `.jar` como librería: no hay que instalar ni configurar ningún servidor. Todas las consultas usan `PreparedStatement`, y registrar una orden descuenta el stock en la misma transacción.
+
+| Tabla | Columnas | Contenido |
 |---|---|---|
-| `data/usuarios.txt` | texto `cedula,hash,nombre,correo` | Funcionarios; la contraseña se guarda como hash PBKDF2 con sal |
-| `data/Medicamentos.txt` | serialización Java | Inventario |
-| `data/ordenes.txt` | texto `documento,entidad,medicamento,cantidad,fecha,total` | Órdenes (las antiguas, sin fecha ni total, se siguen leyendo) |
-| `data/turnos.txt` | texto `fecha,turnoSiguiente` | Turno del día |
+| `funcionarios` | `cedula`, `password`, `nombre`, `correo` | Funcionarios; la contraseña se guarda como hash PBKDF2 con sal |
+| `medicamentos` | `id`, `nombre`, `empresa`, `precio`, `cantidad` | Inventario (el stock no puede quedar negativo) |
+| `ordenes` | `id`, `documento`, `entidad`, `medicamento`, `cantidad`, `fecha`, `total` | Órdenes; las importadas de versiones antiguas no tienen fecha ni total |
+| `turnos` | `dia`, `siguiente` | Turno siguiente del día |
+
+**Actualizar desde la versión 1.1.0 o anterior:** al crear la base por primera vez, la aplicación importa los archivos que usaban esas versiones (`usuarios.txt`, `Medicamentos.txt`, `ordenes.txt` y `turnos.txt`) y los deja sin cambios como respaldo. Así se carga también el usuario de demostración de `data/usuarios.txt`.
 
 ## Roadmap
 
@@ -127,7 +131,7 @@ Modelo editable en Astah: [`docs/diagramas/BosqueFarma.asta`](docs/diagramas/Bos
 - [x] **Ciclo 9: Reglas en el modelo.** Validaciones del controlador movidas al modelo, con pruebas.
 - [x] **Ciclo 10: Mejoras funcionales.** Órdenes con fecha y total, turnos persistentes, sesión del funcionario.
 - [x] **Ciclo 11: Presentación.** README en inglés y metadatos del repositorio.
-- [ ] **Ciclo 12: Base de datos.** Persistencia en SQLite con JDBC.
+- [x] **Ciclo 12: Base de datos.** Persistencia en SQLite con JDBC.
 
 ## Documentación
 
