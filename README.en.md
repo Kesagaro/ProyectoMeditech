@@ -14,16 +14,16 @@ It started as a university project and has been refactored in cycles (see [Roadm
 2. Download [**BosqueFarma.jar**](https://github.com/Kesagaro/ProyectoMeditech/releases/latest/download/BosqueFarma.jar) from the [latest release](https://github.com/Kesagaro/ProyectoMeditech/releases/latest).
 3. Open it with a double click or with `java -jar BosqueFarma.jar`.
 
-On first launch, create a user with **Registrar** (Sign up). Data is stored in a `data/` folder next to the `.jar`.
+On first launch, create a user with **Registrar funcionario** (Sign up). Data is stored in a `data/` folder next to the `.jar`.
 
 ## Features
 
 - Staff sign-up (ID number, name, email) and login; the main menu shows who is signed in
-- Inventory: add, update, list and delete medicines by ID
+- Inventory in a sortable table: add, update and delete medicines; selecting a row loads it into the form for editing
 - Medicine search by name, with price and stock
 - Patient queue numbers tied to the patient's ID; the count survives restarts and resets to 1 every day
 - Patient orders that check the medicine and the available stock, deduct it from the inventory and record the date and total in Colombian pesos
-- Staff listing and removal
+- Staff table (without passwords); remove the member selected in the table
 - Reports: top 5 best-selling medicines, computed from the recorded orders
 
 ## Screenshots
@@ -43,7 +43,7 @@ Screenshots taken from the application with sample data.
 ## Tech stack
 
 - Java 17+ (tested with JDK 17, 21 and 25)
-- Swing (CardLayout, custom components)
+- Swing with [FlatLaf](https://www.formdev.com/flatlaf/) (modern look and feel), sortable tables and a custom theme of colors and fonts (`Tema`)
 - SQLite with JDBC (embedded database in a single file, no server to install)
 - Maven (with Maven Wrapper) and JUnit 5
 - GitHub Actions: builds and runs the tests on every push and pull request, and publishes the `.jar` on each release tag
@@ -90,7 +90,7 @@ src/main/java/co/edu/unbosque/
 ├── controller/          Main (entry point) and Controller (view events → model)
 ├── model/               Farmacia (facade and business rules), Resultado and Turnos
 │   └── persistence/     BaseDeDatos (SQLite), DAOs and DTOs for staff, medicines, orders and queue numbers; legacy file import
-└── view/                View (JFrame + CardLayout) and one panel per screen
+└── view/                View (JFrame + CardLayout), one panel per screen, Tema (FlatLaf, colors and fonts) and Tabla
 
 src/main/resources/            Application logo
 src/test/java/co/edu/unbosque/ JUnit tests for the model and persistence
@@ -132,6 +132,10 @@ Data is stored in a **SQLite** database at `data/bosquefarma.db`. SQLite ships i
 - [x] **Cycle 10: Functional improvements.** Orders with date and total, persistent queue numbers, signed-in staff member.
 - [x] **Cycle 11: Presentation.** English README and repository metadata.
 - [x] **Cycle 12: Database.** SQLite persistence with JDBC.
+
+### Phase 3
+
+- [x] **Cycle 13: Modern interface.** FlatLaf, sortable tables for inventory, orders, staff, search and top 5, and one shared design across every screen.
 
 ## Documentation
 
